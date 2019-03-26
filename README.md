@@ -24,7 +24,7 @@ This project (except for graphics by wheelgenius) is licensed under a [**Creativ
 
 <sub>“Wheel of Fortune” is a registered trademark of Califon Productions, Inc, which was not involved in the production of, and does not endorse, this product. For more information about the game show, visit www.wheeloffortune.com.</sub>
 
-<sub>Wheel graphics created by wheelgenius, used with permission.</sub>
+<sub>Wheel graphics created by [wheelgenius](https://wheelgenius.deviantart.com/), used with permission.</sub>
 
 
 <hr>
