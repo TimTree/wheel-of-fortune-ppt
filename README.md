@@ -10,7 +10,7 @@
 
 ![Total download count](https://img.shields.io/github/downloads/timtree/wheel-of-fortune-ppt/total.svg) + 55,772**
 
-This is the GitHub repo for Flashcards for PowerPoint. Here, you can view the download count, check the project's VBA code, or download the latest version in the Releases page.
+This is the GitHub repo for Wheel of Fortune for PowerPoint. Here, you can view the download count, check the project's VBA code, or download the latest version in the Releases page.
 
 [Click here for the project page on my site.](https://www.gamesbytim.com/2012/01/wheel-of-fortune.html)
 
