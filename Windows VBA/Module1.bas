@@ -248,7 +248,7 @@ Sub PlayerAddFromValuePanel(oClickedShape As Shape)
         End If
     Next
     For i = 1 To 4
-        If ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").Name = oSh.Name Then
+        If ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScoreCompatibility").Name = oSh.Name Then
             j = True
             Exit For
         End If
@@ -351,7 +351,7 @@ End Sub
 Sub PlayerXButton(oSh As Shape)
     Dim i As Integer, j As Boolean, RoundDollarAmount
     For i = 1 To 4
-        If ActivePresentation.Slides(2).Shapes("Player" & i & "XButton").Name = oSh.Name Then
+        If ActivePresentation.Slides(2).Shapes("Player" & i & "XButtonCompatibility").Name = oSh.Name Then
             j = True
             Exit For
         End If
@@ -1379,7 +1379,13 @@ Private Sub setValuePanelDisplay()
     End If
 End Sub
 
-Sub puzzleSwapChoose(oSh As Shape)
+Sub puzzleSwapChoose(oClickedShape As Shape)
+    Dim oSh As Shape
+    For Each oSh In SlideShowWindows(1).View.Slide.Shapes
+        If oSh.Name = oClickedShape.Name Then
+            Exit For
+        End If
+    Next
     Dim numberToSwap
     numberToSwap = InputBox("Swap this puzzle with puzzle number:", "Puzzle Swap")
     While IsNumeric(numberToSwap) = False:
@@ -1517,9 +1523,11 @@ Sub TogglePlayers()
                 .Shapes("Player" & i & "RoundDollarSign").Left = 103.5772 + 157.4233 * (i - 1)
                 .Shapes("Player" & i & "TotalsDollarSign").Left = 103.5772 + 157.4233 * (i - 1)
                 .Shapes("Player" & i & "RoundScore").Left = 121.5772 + 157.4233 * (i - 1)
+                .Shapes("Player" & i & "RoundScoreCompatibility").Left = 121.5772 + 157.4233 * (i - 1)
                 .Shapes("Player" & i & "TotalsScore").Left = 117.9772 + 157.4233 * (i - 1)
                 .Shapes("Player" & i & "Name").Left = 92.63976 + 157.4233 * (i - 1)
                 .Shapes("Player" & i & "XButton").Left = 197.8109 + 157.4233 * (i - 1)
+                .Shapes("Player" & i & "XButtonCompatibility").Left = 197.8109 + 157.4233 * (i - 1)
                 .Shapes("Player" & i & "WildCard").Left = 220.1326 + 157.4233 * (i - 1)
                 .Shapes("Player" & i & "GiftTag").Left = 217.3 + 157.4233 * (i - 1)
             End With
@@ -1539,9 +1547,11 @@ Sub TogglePlayers()
             .Shapes("Player" & j & "RoundDollarSign").Left = 136.9374 + 185.5516 * (j - 1)
             .Shapes("Player" & j & "TotalsDollarSign").Left = 136.9374 + 185.5516 * (j - 1)
             .Shapes("Player" & j & "RoundScore").Left = 154.9374 + 185.5516 * (j - 1)
+            .Shapes("Player" & j & "RoundScoreCompatibility").Left = 154.9374 + 185.5516 * (j - 1)
             .Shapes("Player" & j & "TotalsScore").Left = 151.3376 + 185.5516 * (j - 1)
             .Shapes("Player" & j & "Name").Left = 126 + 185.5516 * (j - 1)
             .Shapes("Player" & j & "XButton").Left = 231.1711 + 185.5516 * (j - 1)
+            .Shapes("Player" & j & "XButtonCompatibility").Left = 231.1711 + 185.5516 * (j - 1)
             .Shapes("Player" & j & "WildCard").Left = 253.4928 + 185.5516 * (j - 1)
             .Shapes("Player" & j & "GiftTag").Left = 250.6602 + 185.5516 * (j - 1)
         End With
@@ -1552,9 +1562,11 @@ Sub TogglePlayers()
             .Shapes("Player" & 4 & "RoundDollarSign").Left = 136.9374 + 185.5516 * (4.4 - 1)
             .Shapes("Player" & 4 & "TotalsDollarSign").Left = 136.9374 + 185.5516 * (4.4 - 1)
             .Shapes("Player" & 4 & "RoundScore").Left = 154.9374 + 185.5516 * (4.4 - 1)
+            .Shapes("Player" & 4 & "RoundScoreCompatibility").Left = 154.9374 + 185.5516 * (4.4 - 1)
             .Shapes("Player" & 4 & "TotalsScore").Left = 151.3376 + 185.5516 * (4.4 - 1)
             .Shapes("Player" & 4 & "Name").Left = 126 + 185.5516 * (4.4 - 1)
             .Shapes("Player" & 4 & "XButton").Left = 231.1711 + 185.5516 * (4.4 - 1)
+            .Shapes("Player" & 4 & "XButtonCompatibility").Left = 231.1711 + 185.5516 * (4.4 - 1)
             .Shapes("Player" & 4 & "WildCard").Left = 253.4928 + 185.5516 * (4.4 - 1)
             .Shapes("Player" & 4 & "GiftTag").Left = 250.6602 + 185.5516 * (4.4 - 1)
             .Shapes("RoundTotals").Left = 30.63039
