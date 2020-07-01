@@ -666,7 +666,7 @@ End Sub
 Sub goToHowToUseFromSetUpPuzzles()
     savePuzzle
     shadeOccupiedPuzzles
-    SlideShowWindows(1).View.GotoSlide 17
+    SlideShowWindows(1).View.GotoSlide 18
 End Sub
 
 Sub goToPuzzleBoardFromSetUpPuzzles()
