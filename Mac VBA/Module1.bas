@@ -4,18 +4,24 @@ Option Explicit
 Sub goToHowToUse()
     ' Allows slide to advance if macros are enabled
     ActivePresentation.Slides(1).Shapes("MacroDisabledText").Visible = False
-    SlideShowWindows(1).View.GotoSlide 18
+    savePuzzle
+    shadeOccupiedPuzzles
+    SlideShowWindows(1).View.GotoSlide 17 + ActivePresentation.SectionProperties.SlidesCount(4)
 End Sub
 
 Sub goToSetUp()
     ' Checks if macros are enabled
     ActivePresentation.Slides(1).Shapes("MacroDisabledText").Visible = False
+    savePuzzle
+    shadeOccupiedPuzzles
     SlideShowWindows(1).View.GotoSlide 7
 End Sub
 
 Sub goToPuzzleBoard()
     ' Checks if macros are enabled
     ActivePresentation.Slides(1).Shapes("MacroDisabledText").Visible = False
+    savePuzzle
+    shadeOccupiedPuzzles
     SlideShowWindows(1).View.GotoSlide 2
 End Sub
 
@@ -641,7 +647,7 @@ End Sub
 Sub goToHowToUseFromSetUpPuzzles()
     savePuzzle
     shadeOccupiedPuzzles
-    SlideShowWindows(1).View.GotoSlide 18
+    SlideShowWindows(1).View.GotoSlide 17 + ActivePresentation.SectionProperties.SlidesCount(4)
 End Sub
 
 Sub goToPuzzleBoardFromSetUpPuzzles()
@@ -1322,7 +1328,7 @@ Sub randomSpin()
     With effNew4
         .Timing.TriggerDelayTime = 3.6
     End With
-    Call Module2.youLandedOn(realRand, ActivePresentation.SlideShowWindow.View.Slide.SlideNumber)
+    Call Module2.youLandedOn(rand, ActivePresentation.SlideShowWindow.View.Slide.SlideNumber)
     If IsNumeric(ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text) Then
         ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = CLng(ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text)
     ElseIf ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text = "Mystery 1" _
