@@ -872,15 +872,16 @@ Sub guessLetter(oSh As Shape)
                 End If
             Next k
             If letterCount = 0 Then
-                If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency = 0 Then
-                Else:
+                If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency <> 0 Then
                     ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = ""
                 End If
                 ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = True
                 ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
                 ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = ""
                 setValuePanelDisplay
-                ActivePresentation.Slides(10).Shapes("GuessLetterWrong").ActionSettings(ppMouseClick).SoundEffect.Play
+                If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency <> 0 Then
+                    ActivePresentation.Slides(10).Shapes("GuessLetterWrong").ActionSettings(ppMouseClick).SoundEffect.Play
+                End If
                 Exit Sub
             End If
             If isVowel(theLetter) Then
@@ -891,7 +892,9 @@ Sub guessLetter(oSh As Shape)
             ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = ""
             ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = False
             setValuePanelDisplay
-            ActivePresentation.Slides(10).Shapes("GuessLetterCorrect").ActionSettings(ppMouseClick).SoundEffect.Play
+            If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency <> 0 Then
+                ActivePresentation.Slides(10).Shapes("GuessLetterCorrect").ActionSettings(ppMouseClick).SoundEffect.Play
+            End If
             Exit Sub
         End If
     End If
