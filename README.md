@@ -12,7 +12,7 @@
 
 This is the GitHub repo for Wheel of Fortune for PowerPoint. Here, you can view the download count, check the project's VBA code, or download the latest version in the Releases page.
 
-[Click here for the project page on my site.](https://www.gamesbytim.com/2012/01/wheel-of-fortune.html)
+[Click here for the project page on my site.](https://www.gamesbytim.com/wheel-of-fortune-for-powerpoint/)
 
 ## Reporting Bugs
 You can either report bugs on my Website's project page or on GitHub Issues. In your report, please let me know what version of PowerPoint you're using.
@@ -24,7 +24,7 @@ This project (except for graphics by wheelgenius) is licensed under a [**Creativ
 
 <sub>“Wheel of Fortune” is a registered trademark of Califon Productions, Inc, which was not involved in the production of, and does not endorse, this product. For more information about the game show, visit www.wheeloffortune.com.</sub>
 
-<sub>Wheel graphics created by [wheelgenius](https://wheelgenius.deviantart.com/), used with permission.</sub>
+<sub>Wheel graphics created by [MarioGS](https://buyavowel.boards.net/thread/6608/all-wheel-wedges)/[wheelgenius](https://www.deviantart.com/wheelgenius), used with permission.</sub>
 
 
 <hr>
