@@ -969,6 +969,70 @@ Sub shiftLeft(oClickedShape As Shape)
     End If
 End Sub
 
+Sub shiftUp()
+    Dim i As Integer, j As Integer
+    Dim blockerTiles
+    blockerTiles = Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 26)
+    For i = LBound(blockerTiles) To UBound(blockerTiles)
+        If ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(blockerTiles(i))).TextFrame.TextRange.Text <> "" Then
+            Exit Sub
+        End If
+    Next i
+    For j = 14 To 25
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 13)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 13)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+    Next j
+    For j = 27 To 40
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 14)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 14)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+    Next j
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(27)).TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(40)).TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(27)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(40)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    For j = 41 To 52
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 13)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 13)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text = ""
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    Next j
+End Sub
+
+Sub shiftDown()
+    Dim i As Integer, j As Integer
+    Dim blockerTiles
+    blockerTiles = Array(27, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52)
+    For i = LBound(blockerTiles) To UBound(blockerTiles)
+        If ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(blockerTiles(i))).TextFrame.TextRange.Text <> "" Then
+            Exit Sub
+        End If
+    Next i
+    For j = 28 To 39
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 13)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 13)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+    Next j
+    For j = 13 To 26
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 14)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 14)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+    Next j
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(13)).TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(26)).TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(13)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(26)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    For j = 1 To 12
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 13)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 13)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text = ""
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    Next j
+End Sub
+
 Sub RSTLNE()
     If ActivePresentation.Slides(2).Shapes("Letter1").Visible = False Then
         MsgBox ("Please load a new puzzle before starting the bonus round.")

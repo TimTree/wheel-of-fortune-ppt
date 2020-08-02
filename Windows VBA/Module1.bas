@@ -885,6 +885,58 @@ Sub shiftLeft(oClickedShape As Shape)
     End If
 End Sub
 
+Sub shiftUp()
+    Dim i As Integer, j As Integer
+    Dim blockerTiles
+    blockerTiles = Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 26)
+    For i = LBound(blockerTiles) To UBound(blockerTiles)
+        If ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(blockerTiles(i))).OLEFormat.Object.Value <> "" Then
+            Exit Sub
+        End If
+    Next i
+    For j = 14 To 25
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j - 13)).OLEFormat.Object.Value = _
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j)).OLEFormat.Object.Value
+    Next j
+    For j = 27 To 40
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j - 14)).OLEFormat.Object.Value = _
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j)).OLEFormat.Object.Value
+    Next j
+    ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(27)).OLEFormat.Object.Value = ""
+    ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(40)).OLEFormat.Object.Value = ""
+    For j = 41 To 52
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j - 13)).OLEFormat.Object.Value = _
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j)).OLEFormat.Object.Value
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j)).OLEFormat.Object.Value = ""
+    Next j
+End Sub
+
+Sub shiftDown()
+    Dim i As Integer, j As Integer
+    Dim blockerTiles
+    blockerTiles = Array(27, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52)
+    For i = LBound(blockerTiles) To UBound(blockerTiles)
+        If ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(blockerTiles(i))).OLEFormat.Object.Value <> "" Then
+            Exit Sub
+        End If
+    Next i
+    For j = 28 To 39
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j + 13)).OLEFormat.Object.Value = _
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j)).OLEFormat.Object.Value
+    Next j
+    For j = 13 To 26
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j + 14)).OLEFormat.Object.Value = _
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j)).OLEFormat.Object.Value
+    Next j
+    ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(13)).OLEFormat.Object.Value = ""
+    ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(26)).OLEFormat.Object.Value = ""
+    For j = 1 To 12
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j + 13)).OLEFormat.Object.Value = _
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j)).OLEFormat.Object.Value
+        ActivePresentation.Slides(8).Shapes("BoardTile" + CStr(j)).OLEFormat.Object.Value = ""
+    Next j
+End Sub
+
 Sub RSTLNE()
     If ActivePresentation.Slides(2).Shapes("Letter1").Visible = False Then
         MsgBox ("Please load a new puzzle before starting the bonus round.")
