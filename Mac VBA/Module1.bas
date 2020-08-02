@@ -889,7 +889,44 @@ Sub revealLetter(oSh As Shape)
             End If
         Next i
         If j = True Then
-            If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB <> RGB(24, 154, 80) Then
+            If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(0, 0, 255) Then
+                ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text
+                ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(255, 255, 255)
+            ElseIf ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB <> RGB(24, 154, 80) Then
+                ' If a letter was already selected in letter selector, do nothing
+                Dim k As Integer
+                For k = 1 To 26:
+                    If ActivePresentation.Slides(2).Shapes("Letter" & k).TextFrame.TextRange.Text = "" Then
+                        Exit Sub
+                    End If
+                Next k
+                ' If no letters were selected, instantiate a toss-up.
+                ' Prompt for toss-up value at stake if there's no value currently in Value Panel
+                If ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = "" Then
+                    Dim sText As String
+                    sText = InputBox("What is the toss-up value at stake in dollars?", "Set Toss-Up Value At Stake", "")
+                    While IsNumeric(sText) = False And sText <> ""
+                        sText = InputBox("You can only enter numbers here. Try again:", "Set Toss-Up Value At Stake", sText)
+                    Wend
+                    If sText = "" Then
+                        Exit Sub
+                    Else:
+                        If CLng(sText) > 10000 Or CLng(sText) < 1 Then
+                            MsgBox "The toss-up value at stake must range from 1 to 10000.", 0, "Set Toss-Up Value At Stake"
+                            Exit Sub
+                        Else:
+                            ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = CLng(sText)
+                            ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = False
+                            setValuePanelDisplay
+                        End If
+                    End If
+                End If
+                ' Hide the letter selector during a toss-up
+                Dim m As Integer
+                For m = 1 To 26:
+                    ActivePresentation.Slides(2).Shapes("Letter" & m).Visible = False
+                Next m
+                ' Reveal letter
                 ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text
                 ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(255, 255, 255)
             End If
@@ -1063,6 +1100,61 @@ Sub toggleWheelValues()
     End If
 End Sub
 
+Sub toggleShotClock(oClickedShape As Shape)
+    On Error GoTo errHandler
+    Dim oSh As Shape, sText As String, currentShotClockTime As Integer, newShotClockTime As Integer
+    For Each oSh In SlideShowWindows(1).View.Slide.Shapes
+        If oSh.Name = oClickedShape.Name Then
+            Exit For
+        End If
+    Next
+    If oSh.TextFrame.TextRange.Text = "none" Then
+        currentShotClockTime = 0
+    Else:
+        currentShotClockTime = CInt(Replace(oSh.TextFrame.TextRange.Text, " seconds", ""))
+    End If
+    sText = InputBox("The shot clock helps you enforce time limits for player decisions." & vbNewLine & vbNewLine & _
+    "Enter a number from 1 to 30 to enable and set the shot clock's time limit in seconds, or 0 to disable the shot clock.", "Configure Shot Clock", CStr(currentShotClockTime))
+    While IsNumeric(sText) = False And sText <> ""
+        sText = InputBox("You can only enter numbers here. Try again:", "Configure Shot Clock", sText)
+    Wend
+    If sText = "" Then
+        Exit Sub
+    Else:
+        newShotClockTime = CInt(sText)
+        If newShotClockTime = 0 Then
+            Dim i As Integer
+            oSh.TextFrame.TextRange.Text = "none"
+            ActivePresentation.Slides(2).Shapes("ShotClockBaseNumber").TextFrame.TextRange.Text = ""
+            ActivePresentation.Slides(2).Shapes("ShotClockBaseNumber").Visible = False
+            ActivePresentation.Slides(2).Shapes("ShotClockBase").Visible = False
+            ActivePresentation.Slides(2).Shapes("ShotClockOverlay").Visible = False
+            For i = 0 To 29
+                ActivePresentation.Slides(2).Shapes("ShotClock" & i).Visible = False
+            Next i
+        ElseIf newShotClockTime > 30 Or newShotClockTime < 0 Then
+            MsgBox "The shot clock time limit cannot exceed 30 seconds.", 0, "Configure Shot Clock Error"
+            Exit Sub
+        Else:
+            Dim j As Integer, k As Integer
+            oSh.TextFrame.TextRange.Text = CStr(newShotClockTime) & " seconds"
+            ActivePresentation.Slides(2).Shapes("ShotClockBaseNumber").TextFrame.TextRange.Text = CStr(newShotClockTime)
+            ActivePresentation.Slides(2).Shapes("ShotClockBaseNumber").Visible = True
+            ActivePresentation.Slides(2).Shapes("ShotClockBase").Visible = True
+            ActivePresentation.Slides(2).Shapes("ShotClockOverlay").Visible = True
+            For k = 0 To 29
+                ActivePresentation.Slides(2).Shapes("ShotClock" & k).Visible = False
+            Next k
+            For j = 0 To newShotClockTime - 1
+                ActivePresentation.Slides(2).Shapes("ShotClock" & j).Visible = True
+            Next j
+        End If
+    End If
+    Exit Sub
+errHandler:
+    MsgBox "The shot clock time limit cannot exceed 30 seconds.", 0, "Configure Shot Clock Error"
+End Sub
+
 Sub shiftRight(oClickedShape As Shape)
   Dim oSh As Shape
     Dim sText As String
@@ -1125,6 +1217,70 @@ Sub shiftLeft(oClickedShape As Shape)
         ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(i - 1)).TextFrame.TextRange.Text = ""
         ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(i - 1)).Fill.ForeColor.RGB = RGB(24, 154, 80)
     End If
+End Sub
+
+Sub shiftUp()
+    Dim i As Integer, j As Integer
+    Dim blockerTiles
+    blockerTiles = Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 26)
+    For i = LBound(blockerTiles) To UBound(blockerTiles)
+        If ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(blockerTiles(i))).TextFrame.TextRange.Text <> "" Then
+            Exit Sub
+        End If
+    Next i
+    For j = 14 To 25
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 13)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 13)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+    Next j
+    For j = 27 To 40
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 14)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 14)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+    Next j
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(27)).TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(40)).TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(27)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(40)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    For j = 41 To 52
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 13)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j - 13)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text = ""
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    Next j
+End Sub
+
+Sub shiftDown()
+    Dim i As Integer, j As Integer
+    Dim blockerTiles
+    blockerTiles = Array(27, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52)
+    For i = LBound(blockerTiles) To UBound(blockerTiles)
+        If ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(blockerTiles(i))).TextFrame.TextRange.Text <> "" Then
+            Exit Sub
+        End If
+    Next i
+    For j = 28 To 39
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 13)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 13)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+    Next j
+    For j = 13 To 26
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 14)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 14)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+    Next j
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(13)).TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(26)).TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(13)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(26)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    For j = 1 To 12
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 13)).TextFrame.TextRange.Text = _
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j + 13)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).TextFrame.TextRange.Text = ""
+        ActivePresentation.Slides(8).Shapes("SetUpPuzzle" + CStr(j)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+    Next j
 End Sub
 
 Sub RSTLNE()
