@@ -221,7 +221,7 @@ Sub PlayerBuyaVowel(oSh As Shape)
     Dim i As Integer
     Dim j As Boolean
     Dim VOWELCOST As Integer
-    VOWELCOST = CInt(ActivePresentation.Slides(9).Shapes("VowelPrice").TextFrame.TextRange.Text)
+    VOWELCOST = CInt(Replace(ActivePresentation.Slides(9).Shapes("VowelPrice").TextFrame.TextRange.Text, "$", ""))
     For i = 1 To 3
         If ActivePresentation.Slides(2).Shapes("Player" & i & "BuyVowelButton").Name = oSh.Name Then
             j = True
@@ -245,7 +245,7 @@ Sub PlayerTransferTotals(oSh As Shape)
     Dim i As Integer
     Dim j As Boolean
     Dim HOUSEMINIMUM As Integer
-    HOUSEMINIMUM = CInt(ActivePresentation.Slides(9).Shapes("HouseMinimum").TextFrame.TextRange.Text)
+    HOUSEMINIMUM = CInt(Replace(ActivePresentation.Slides(9).Shapes("HouseMinimum").TextFrame.TextRange.Text, "$", ""))
     For i = 1 To 3
         If ActivePresentation.Slides(2).Shapes("Player" & i & "TransferTotalsButton").Name = oSh.Name Then
             j = True
@@ -408,7 +408,7 @@ Sub EditVowelPrice(oClickedShape As Shape)
             Exit For
         End If
     Next
-    sText = InputBox("Edit the vowel price. The default price is $250.", "Edit Vowel Price", CInt(oSh.TextFrame.TextRange.Text))
+    sText = InputBox("Edit the vowel price. The default price is $250.", "Edit Vowel Price", CInt(Replace(oSh.TextFrame.TextRange.Text, "$", "")))
     While IsNumeric(sText) = False And sText <> ""
     sText = InputBox("You can only enter numbers here. Try again:", "Edit Vowel Price", sText)
     Wend
@@ -432,7 +432,7 @@ Sub EditHouseMinimum(oClickedShape As Shape)
             Exit For
         End If
     Next
-    sText = InputBox("Edit the house minimum. The default minimum is $1000.", "Edit House Minimum", CInt(oSh.TextFrame.TextRange.Text))
+    sText = InputBox("Edit the house minimum. The default minimum is $1000.", "Edit House Minimum", CInt(Replace(oSh.TextFrame.TextRange.Text, "$", "")))
     While IsNumeric(sText) = False And sText <> ""
     sText = InputBox("You can only enter numbers here. Try again:", "Edit House Minimum", sText)
     Wend
