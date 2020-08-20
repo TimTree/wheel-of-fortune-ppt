@@ -287,7 +287,7 @@ End Sub
 
 Sub PlayerBuyaVowel(oSh As Shape)
     Dim i As Integer, j As Boolean, RoundDollarAmount, playerName, VOWELCOST As Long
-    VOWELCOST = CLng(ActivePresentation.Slides(9).Shapes("VowelPrice").TextFrame.TextRange.Text)
+    VOWELCOST = CLng(Replace(ActivePresentation.Slides(9).Shapes("VowelPrice").TextFrame.TextRange.Text, "$", ""))
     For i = 1 To 4
         If ActivePresentation.Slides(2).Shapes("Player" & i & "BuyVowelButton").Name = oSh.Name Then
             j = True
@@ -311,7 +311,7 @@ End Sub
 
 Sub PlayerTransferTotals(oSh As Shape)
     Dim i As Integer, j As Boolean, RoundDollarAmount, TotalsDollarAmount, HOUSEMINIMUM As Long, shouldIHouse
-    HOUSEMINIMUM = CLng(ActivePresentation.Slides(9).Shapes("HouseMinimum").TextFrame.TextRange.Text)
+    HOUSEMINIMUM = CLng(Replace(ActivePresentation.Slides(9).Shapes("HouseMinimum").TextFrame.TextRange.Text, "$", ""))
     For i = 1 To 4
         If ActivePresentation.Slides(2).Shapes("Player" & i & "TransferTotalsButton").Name = oSh.Name Then
             j = True
@@ -485,7 +485,7 @@ Sub EditVowelPrice(oClickedShape As Shape)
             Exit For
         End If
     Next
-    sText = InputBox("Edit the vowel price. The default price is $250.", "Edit Vowel Price", CLng(oSh.TextFrame.TextRange.Text))
+    sText = InputBox("Edit the vowel price. The default price is $250.", "Edit Vowel Price", CLng(Replace(oSh.TextFrame.TextRange.Text, "$", "")))
     While IsNumeric(sText) = False And sText <> ""
         sText = InputBox("You can only enter numbers here. Try again:", "Edit Vowel Price", sText)
     Wend
@@ -508,7 +508,7 @@ Sub EditHouseMinimum(oClickedShape As Shape)
             Exit For
         End If
     Next
-    sText = InputBox("Edit the house minimum. The default minimum is $1000.", "Edit House Minimum", CLng(oSh.TextFrame.TextRange.Text))
+    sText = InputBox("Edit the house minimum. The default minimum is $1000.", "Edit House Minimum", CLng(Replace(oSh.TextFrame.TextRange.Text, "$", "")))
     While IsNumeric(sText) = False And sText <> ""
     sText = InputBox("You can only enter numbers here. Try again:", "Edit House Minimum", sText)
     Wend
@@ -1488,8 +1488,8 @@ Sub randomSpin()
         .Timing.TriggerDelayTime = 3.6
     End With
     Call Module2.youLandedOn(rand, ActivePresentation.SlideShowWindow.View.Slide.SlideNumber)
-    If IsNumeric(ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text) Then
-        ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = CLng(ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text)
+    If IsNumeric(Replace(ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text, "$", "")) Then
+        ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = CLng(Replace(ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text, "$", ""))
     ElseIf ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text = "Mystery 1" _
     Or ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text = "Mystery 2" _
     Or ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text = "Express" Then

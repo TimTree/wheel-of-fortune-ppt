@@ -302,7 +302,7 @@ End Sub
 
 Sub PlayerBuyaVowel(oSh As Shape)
     Dim i As Integer, j As Boolean, RoundDollarAmount, playerName, VOWELCOST As Long
-    VOWELCOST = CLng(ActivePresentation.Slides(9).Shapes("VowelPrice").TextFrame.TextRange.Text)
+    VOWELCOST = CLng(Replace(ActivePresentation.Slides(9).Shapes("VowelPrice").TextFrame.TextRange.Text, "$", ""))
     For i = 1 To 4
         If ActivePresentation.Slides(2).Shapes("Player" & i & "BuyVowelButton").Name = oSh.Name Then
             j = True
@@ -326,7 +326,7 @@ End Sub
 
 Sub PlayerTransferTotals(oSh As Shape)
     Dim i As Integer, j As Boolean, RoundDollarAmount, TotalsDollarAmount, HOUSEMINIMUM As Long, shouldIHouse
-    HOUSEMINIMUM = CLng(ActivePresentation.Slides(9).Shapes("HouseMinimum").TextFrame.TextRange.Text)
+    HOUSEMINIMUM = CLng(Replace(ActivePresentation.Slides(9).Shapes("HouseMinimum").TextFrame.TextRange.Text, "$", ""))
     For i = 1 To 4
         If ActivePresentation.Slides(2).Shapes("Player" & i & "TransferTotalsButton").Name = oSh.Name Then
             j = True
@@ -512,7 +512,7 @@ Sub EditVowelPrice(oClickedShape As Shape)
             Exit For
         End If
     Next
-    sText = InputBox("Edit the vowel price. The default price is $250.", "Edit Vowel Price", CLng(oSh.TextFrame.TextRange.Text))
+    sText = InputBox("Edit the vowel price. The default price is $250.", "Edit Vowel Price", CLng(Replace(oSh.TextFrame.TextRange.Text, "$", "")))
     While IsNumeric(sText) = False And sText <> ""
         sText = InputBox("You can only enter numbers here. Try again:", "Edit Vowel Price", sText)
     Wend
@@ -535,7 +535,7 @@ Sub EditHouseMinimum(oClickedShape As Shape)
             Exit For
         End If
     Next
-    sText = InputBox("Edit the house minimum. The default minimum is $1000.", "Edit House Minimum", CLng(oSh.TextFrame.TextRange.Text))
+    sText = InputBox("Edit the house minimum. The default minimum is $1000.", "Edit House Minimum", CLng(Replace(oSh.TextFrame.TextRange.Text, "$", "")))
     While IsNumeric(sText) = False And sText <> ""
     sText = InputBox("You can only enter numbers here. Try again:", "Edit House Minimum", sText)
     Wend
@@ -1105,14 +1105,8 @@ Sub toggleShotClock(oClickedShape As Shape)
     Else:
         currentShotClockTime = CInt(Replace(oSh.TextFrame.TextRange.Text, " seconds", ""))
     End If
-    If Val(Application.Version) <= 14 Then
-        sText = InputBox("The shot clock helps you enforce time limits for player decisions." & vbNewLine & vbNewLine & _
-        "Enter a number from 1 to 30 to enable and set the shot clock's time limit in seconds, or 0 to disable the shot clock." & vbNewLine & vbNewLine & _
-        "Note: Due to a rendering bug in PowerPoint 2010, the slide show will restart itself to apply shot clock changes.", "Configure Shot Clock", CStr(currentShotClockTime))
-    Else:
-        sText = InputBox("The shot clock helps you enforce time limits for player decisions." & vbNewLine & vbNewLine & _
-        "Enter a number from 1 to 30 to enable and set the shot clock's time limit in seconds, or 0 to disable the shot clock.", "Configure Shot Clock", CStr(currentShotClockTime))
-    End If
+    sText = InputBox("The shot clock helps you enforce time limits for player decisions." & vbNewLine & vbNewLine & _
+    "Enter a number from 1 to 30 to enable and set the shot clock's time limit in seconds, or 0 to disable the shot clock.", "Configure Shot Clock", CStr(currentShotClockTime))
     While IsNumeric(sText) = False And sText <> ""
         sText = InputBox("You can only enter numbers here. Try again:", "Configure Shot Clock", sText)
     Wend
@@ -1149,9 +1143,15 @@ Sub toggleShotClock(oClickedShape As Shape)
         End If
         ' PowerPoint 2010 has a bug that breaks triggers when modifying its shapes' visibilities. The workaround for this version is to restart the slide show.
         If Val(Application.Version) <= 14 Then
+            Dim m As Integer, n As Integer
             ActivePresentation.SlideShowWindow.View.Exit
+            For m = 1 To 8
+               ActivePresentation.Slides(m).SlideShowTransition.Hidden = msoTrue
+            Next m
             ActivePresentation.SlideShowSettings.Run
-            SlideShowWindows(1).View.GotoSlide 9
+            For n = 1 To 8
+               ActivePresentation.Slides(n).SlideShowTransition.Hidden = msoFalse
+            Next n
         End If
     End If
     Exit Sub
@@ -1476,8 +1476,8 @@ Sub randomSpin()
         .Timing.TriggerDelayTime = 3.6
     End With
     Call Module2.youLandedOn(rand, ActivePresentation.SlideShowWindow.View.Slide.SlideNumber)
-    If IsNumeric(ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text) Then
-        ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = CLng(ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text)
+    If IsNumeric(Replace(ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text, "$", "")) Then
+        ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = CLng(Replace(ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text, "$", ""))
     ElseIf ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text = "Mystery 1" _
     Or ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text = "Mystery 2" _
     Or ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange.Text = "Express" Then
