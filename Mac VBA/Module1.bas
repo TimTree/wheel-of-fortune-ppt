@@ -144,7 +144,7 @@ Sub ClearBoardButton()
         ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text = ""
         ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(24, 154, 80)
     Next i
-    For j = 1 To 26
+    For j = 1 To 27
         ActivePresentation.Slides(2).Shapes("Letter" & j).Visible = False
         bringLetterBack (j)
     Next j
@@ -271,6 +271,12 @@ Sub PlayerAddFromValuePanel(oClickedShape As Shape)
                         ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
                         CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
                         effectiveWheelValue
+                        If ActivePresentation.Slides(9).Shapes("WheelItems").TextFrame.TextRange.Text = "claimable once" And _
+                        ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = "** $10000 **" Then
+                            If ActivePresentation.Slides(3).Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 0 Then
+                                toggle10000Wedge
+                            End If
+                        End If
                     Else:
                         ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
                         CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
@@ -356,6 +362,17 @@ End Sub
 Sub TogglePlayerItem(oSh As Shape)
     If oSh.Fill.Transparency = 1 Then
         oSh.Fill.Transparency = 0
+        If ActivePresentation.Slides(9).Shapes("WheelItems").TextFrame.TextRange.Text = "claimable once" Then
+            If oSh.Name Like "*WildCard" Then
+                If ActivePresentation.Slides(3).Shapes("TheWheel").GroupItems("WildCard").Fill.Transparency = 0 Then
+                    toggleWildCard
+                End If
+            ElseIf oSh.Name Like "*GiftTag" Then
+                If ActivePresentation.Slides(3).Shapes("TheWheel").GroupItems("GiftTag").Fill.Transparency = 0 Then
+                    toggleGiftTag
+                End If
+            End If
+        End If
     Else:
         oSh.Fill.Transparency = 1
     End If
@@ -699,7 +716,7 @@ Sub LoadPuzzleOrSolve()
             MsgBox "No puzzles were found. Create puzzles using Set Up Puzzles on the top right of this slide.", 0, "Load Puzzle"
             Exit Sub
         End If
-        numberToLoad = InputBox("Enter the puzzle number to load:", "Load Puzzle")
+        numberToLoad = InputBox("Enter the puzzle number to load:", "Load Puzzle", ActivePresentation.Slides(2).Shapes("NextPuzzleToLoad").TextFrame.TextRange.Text)
         While IsNumeric(numberToLoad) = False:
             If numberToLoad = "" Then
                 Exit Sub
@@ -733,6 +750,8 @@ End Sub
 
 Private Sub loadPuzzle(i As Integer)
     On Error GoTo errHandler
+    Dim SpanishNError As Boolean
+    SpanishNError = False
     If puzzleExists(i) = False Then
         MsgBox "No puzzle found for number " & i & ".", 0, "Load Puzzle Error"
         Exit Sub
@@ -742,21 +761,35 @@ Private Sub loadPuzzle(i As Integer)
     PuzzleNumberIndex = Int((i - 1) / 12)
     For j = 1 To 52
         ActivePresentation.Slides(2).Shapes("PuzzleBoard" & j).Fill.ForeColor.RGB = ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).Fill.ForeColor.RGB
-        ActivePresentation.Slides(2).Shapes("PuzzleCache" & j).TextFrame.TextRange.Text = ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text
-        If isLetter(ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text) = False Then
-            ActivePresentation.Slides(2).Shapes("PuzzleBoard" & j).TextFrame.TextRange.Text = ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text
+        If ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text <> "" Then
+            ActivePresentation.Slides(2).Shapes("PuzzleCache" & j).TextFrame.TextRange.Text = ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text
+            If isLetter(ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text) = False Then
+                ActivePresentation.Slides(2).Shapes("PuzzleBoard" & j).TextFrame.TextRange.Text = ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text
+            End If
+            If ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text = "—" And _
+            ActivePresentation.Slides(9).Shapes("Spanish—").TextFrame.TextRange.Text = "off" Then
+               SpanishNError = True
+               toggleSpanishN
+            End If
         End If
     Next j
     ActivePresentation.Slides(2).Shapes("CategoryBox").TextFrame.TextRange.Text = ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleCategory" & i).TextFrame.TextRange.Text
-    For k = 1 To 26
-        ActivePresentation.Slides(2).Shapes("Letter" & k).Visible = True
+    For k = 1 To 27
+        If k < 27 Or (k = 27 And ActivePresentation.Slides(9).Shapes("Spanish—").TextFrame.TextRange.Text = "on") Then
+            ActivePresentation.Slides(2).Shapes("Letter" & k).Visible = True
+        End If
     Next k
     ActivePresentation.Slides(2).Shapes("LeftTab").Fill.ForeColor.RGB = RGB(198, 159, 48)
     ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Solve"
     ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
     ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ""
     ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(2).Shapes("NextPuzzleToLoad").TextFrame.TextRange.Text = i + 1
     ActivePresentation.Slides(10).Shapes("LoadPuzzleChime").ActionSettings(ppMouseClick).SoundEffect.Play
+    If SpanishNError Then
+        MsgBox "This puzzle uses the letter —, but the Spanish — setting was disabled. This setting has automatically been enabled." & vbNewLine & vbNewLine & _
+        "You can re-disable the Spanish — in the Settings slide.", 0, "Spanish — Note"
+    End If
     Exit Sub
 errHandler:
     Exit Sub
@@ -771,7 +804,7 @@ Private Sub solvePuzzle()
             ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(255, 255, 255)
         End If
     Next i
-    For j = 1 To 26
+    For j = 1 To 27
         ActivePresentation.Slides(2).Shapes("Letter" & j).Visible = False
     Next j
     ActivePresentation.Slides(2).Shapes("LeftTab").Fill.ForeColor.RGB = RGB(41, 183, 233)
@@ -786,8 +819,10 @@ End Sub
 
 Private Function isLetter(strValue As String) As Boolean
     Dim i As Integer
+    Dim extendedChars As Variant
+    extendedChars = Array("¡", "¿", "¬", "ƒ", "«", "…", "»", " ", "À", "Õ", "Ã", "Œ", "œ", "—", "”", "“", "‘", "÷", "⁄", "Ÿ", "€", "‹")
     For i = 1 To Len(strValue)
-        If Asc(Mid(strValue, 1, 1)) < 65 Or Asc(Mid(strValue, 1, 1)) > 90 Then
+        If (Asc(Mid(strValue, 1, 1)) < 65 Or Asc(Mid(strValue, 1, 1)) > 90) And Not isInArray(Mid(strValue, 1, 1), extendedChars) Then
             isLetter = False
         Else:
             isLetter = True
@@ -808,10 +843,46 @@ Private Function isVowel(strValue As String) As Boolean
     Next i
 End Function
 
+Private Function lettersMatch(letter1 As String, letterSelectorLetter As String) As Boolean
+    Dim extendedChars As Variant
+    Select Case letterSelectorLetter
+        Case "A"
+            extendedChars = Array("A", "¡", "¿", "¬", "ƒ")
+        Case "C"
+            extendedChars = Array("C", "«")
+        Case "E"
+            extendedChars = Array("E", "…", "»", " ", "À")
+        Case "I"
+            extendedChars = Array("I", "Õ", "Ã", "Œ", "œ")
+        Case "O"
+            extendedChars = Array("O", "”", "“", "‘", "÷")
+        Case "U"
+            extendedChars = Array("U", "⁄", "Ÿ", "€", "‹")
+        Case Else
+            extendedChars = Array(letterSelectorLetter)
+    End Select
+    If isInArray(letter1, extendedChars) Then
+        lettersMatch = True
+    Else:
+        lettersMatch = False
+    End If
+End Function
+
+Private Function isInArray(theString As String, arr As Variant) As Boolean
+    Dim i
+    For i = LBound(arr) To UBound(arr)
+        If arr(i) = theString Then
+            isInArray = True
+            Exit Function
+        End If
+    Next i
+    isInArray = False
+End Function
+
 Sub guessLetter(oSh As Shape)
     On Error GoTo errHandler
     Dim i As Integer, j As Boolean, k As Integer
-    For i = 1 To 26
+    For i = 1 To 27
         If ActivePresentation.Slides(2).Shapes("Letter" & i).Name = oSh.Name Then
             j = True
             Exit For
@@ -824,7 +895,7 @@ Sub guessLetter(oSh As Shape)
             theLetter = ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text
             If ActivePresentation.Slides(2).Shapes("BonusOutline").Line.Transparency = 0 Then
                 If Len(ActivePresentation.Slides(2).Shapes("BonusLetters").TextFrame.TextRange.Text) >= 5 Then
-                    MsgBox "The contestant can only choose four letters (or five if he or she has a wild card). Use the spiral arrow button to remove letters if necessary.", _
+                    MsgBox "The contestant can only choose four letters (or five if he or she has a Wild Card). Use the spiral arrow button to remove letters if necessary.", _
                     0, "Add Bonus Round Letter Error"
                     Exit Sub
                 Else:
@@ -837,13 +908,15 @@ Sub guessLetter(oSh As Shape)
                 End If
             End If
             For k = 1 To 52
-                If ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text = theLetter Then
-                    If ActivePresentation.Slides(9).Shapes("BlueTiles").TextFrame.TextRange.Text = "off" Then
-                        ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = theLetter
-                    Else:
-                        ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(0, 0, 255)
+                If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(255, 255, 255) And ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = "" Then
+                    If lettersMatch(ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text, theLetter) Then
+                        If ActivePresentation.Slides(9).Shapes("BlueTiles").TextFrame.TextRange.Text = "off" Then
+                            ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text
+                        Else:
+                            ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(0, 0, 255)
+                        End If
+                        letterCount = letterCount + 1
                     End If
-                    letterCount = letterCount + 1
                 End If
             Next k
             If letterCount = 0 Then
@@ -895,7 +968,7 @@ Sub revealLetter(oSh As Shape)
             ElseIf ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB <> RGB(24, 154, 80) Then
                 ' If a letter was already selected in letter selector, do nothing
                 Dim k As Integer
-                For k = 1 To 26:
+                For k = 1 To 27:
                     If ActivePresentation.Slides(2).Shapes("Letter" & k).TextFrame.TextRange.Text = "" Then
                         Exit Sub
                     End If
@@ -923,7 +996,7 @@ Sub revealLetter(oSh As Shape)
                 End If
                 ' Hide the letter selector during a toss-up
                 Dim m As Integer
-                For m = 1 To 26:
+                For m = 1 To 27:
                     ActivePresentation.Slides(2).Shapes("Letter" & m).Visible = False
                 Next m
                 ' Reveal letter
@@ -935,7 +1008,11 @@ Sub revealLetter(oSh As Shape)
 End Sub
 
 Private Sub bringLetterBack(i As Integer)
-    ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = Chr(i + 64)
+    If i = 27 Then
+        ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = "—"
+    Else:
+        ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = Chr(i + 64)
+    End If
 End Sub
 
 Sub EditSetUpPuzzle(oClickedShape As Shape)
@@ -998,6 +1075,9 @@ Sub wipeOnClose()
     If ActivePresentation.Slides(3).Shapes("TheWheel").GroupItems("WildCard").Fill.Transparency = 1 Then
         toggleWildCard
     End If
+    If ActivePresentation.Slides(3).Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 1 Then
+        toggle10000Wedge
+    End If
     If ActivePresentation.Slides(3).Shapes("TheWheel").GroupItems("GiftTag").Fill.Transparency = 0 Then
         toggleGiftTag
     End If
@@ -1007,6 +1087,7 @@ Sub wipeOnClose()
     For j = 3 To 6
         ActivePresentation.Slides(j).Shapes("WheelValue").TextFrame.TextRange.Text = ""
     Next j
+    ActivePresentation.Slides(2).Shapes("NextPuzzleToLoad").TextFrame.TextRange.Text = "1"
     ActivePresentation.SlideShowWindow.View.Exit
 End Sub
 
@@ -1049,21 +1130,35 @@ Sub toggleOnOff(oClickedShape As Shape)
     End If
 End Sub
 
-Sub toggle10000Wedge()
-    Dim i As Integer, j As Integer
-    If ActivePresentation.Slides(9).Shapes("10000Wedge").TextFrame.TextRange.Text = "on" Then
-        ActivePresentation.Slides(9).Shapes("10000Wedge").TextFrame.TextRange.Text = "off"
-        ActivePresentation.Slides(9).Shapes("10000Wedge").Fill.ForeColor.RGB = RGB(217, 150, 148)
-        For i = 3 To 5
-            ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 1
-        Next i
+Sub toggleSpanishN()
+    If ActivePresentation.Slides(9).Shapes("Spanish—").TextFrame.TextRange.Text = "on" Then
+        ActivePresentation.Slides(9).Shapes("Spanish—").TextFrame.TextRange.Text = "off"
+        ActivePresentation.Slides(9).Shapes("Spanish—").Fill.ForeColor.RGB = RGB(217, 150, 148)
+        ActivePresentation.Slides(2).Shapes("Letter27").Visible = False
+        ActivePresentation.Slides(2).Shapes("LetterSecondRowGroup").Left = 30.18748
     Else:
-        ActivePresentation.Slides(9).Shapes("10000Wedge").TextFrame.TextRange.Text = "on"
-        ActivePresentation.Slides(9).Shapes("10000Wedge").Fill.ForeColor.RGB = RGB(195, 214, 155)
-        For j = 3 To 5
-            ActivePresentation.Slides(j).Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 0
-        Next j
+        ActivePresentation.Slides(9).Shapes("Spanish—").TextFrame.TextRange.Text = "on"
+        ActivePresentation.Slides(9).Shapes("Spanish—").Fill.ForeColor.RGB = RGB(195, 214, 155)
+        If ActivePresentation.Slides(2).Shapes("Letter1").Visible = True Then
+            ActivePresentation.Slides(2).Shapes("Letter27").Visible = True
+        End If
+        ActivePresentation.Slides(2).Shapes("LetterSecondRowGroup").Left = 39.18748
     End If
+End Sub
+
+Sub toggle10000Wedge()
+    Dim transparentLevel As Integer, tenThousandString As String, i As Integer
+    If ActivePresentation.Slides(3).Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 0 Then
+        transparentLevel = 1
+        tenThousandString = "Add"
+    Else:
+        transparentLevel = 0
+        tenThousandString = "Remove"
+    End If
+    For i = 3 To 5
+        ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = transparentLevel
+        ActivePresentation.Slides(i).Shapes("Toggle10000Wedge").TextFrame.TextRange.Text = tenThousandString + " $10,000 Wedge"
+    Next i
 End Sub
 
 Sub toggleGiftTag()
@@ -1097,6 +1192,15 @@ Sub toggleWheelValues()
                 ActivePresentation.Slides(k).Shapes("TheWheel").GroupItems("ClassicWedge" & CStr(m)).Fill.Transparency = 1
             Next m
         Next k
+    End If
+End Sub
+
+Sub toggleWheelItems()
+    Dim i As Integer, j As Integer, k As Integer, m As Integer
+    If ActivePresentation.Slides(9).Shapes("WheelItems").TextFrame.TextRange.Text = "claimable once" Then
+        ActivePresentation.Slides(9).Shapes("WheelItems").TextFrame.TextRange.Text = "multi-claimable"
+    Else:
+        ActivePresentation.Slides(9).Shapes("WheelItems").TextFrame.TextRange.Text = "claimable once"
     End If
 End Sub
 
@@ -1307,11 +1411,13 @@ Private Sub guessLetterViaFunction(i As Integer)
         Exit Sub
     End If
     For k = 1 To 52
-        If ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text = theLetter Then
-            If ActivePresentation.Slides(9).Shapes("BlueTiles").TextFrame.TextRange.Text = "off" Then
-                ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = theLetter
-            Else:
-                ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(0, 0, 255)
+        If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(255, 255, 255) And ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = "" Then
+            If lettersMatch(ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text, theLetter) Then
+                If ActivePresentation.Slides(9).Shapes("BlueTiles").TextFrame.TextRange.Text = "off" Then
+                    ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text
+                Else:
+                    ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(0, 0, 255)
+                End If
             End If
         End If
     Next k
@@ -1356,13 +1462,15 @@ Sub guessBonusLetters()
         For i = 1 To Len(ActivePresentation.Slides(2).Shapes("BonusLetters").TextFrame.TextRange.Text)
             letterToGuess = Mid(ActivePresentation.Slides(2).Shapes("BonusLetters").TextFrame.TextRange.Text, i, 1)
             For k = 1 To 52
-                If ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text = letterToGuess Then
-                    If ActivePresentation.Slides(9).Shapes("BlueTiles").TextFrame.TextRange.Text = "off" Then
-                        ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = letterToGuess
-                    Else:
-                        ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(0, 0, 255)
+                If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(255, 255, 255) And ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = "" Then
+                    If lettersMatch(ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text, letterToGuess) Then
+                        If ActivePresentation.Slides(9).Shapes("BlueTiles").TextFrame.TextRange.Text = "off" Then
+                            ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text
+                        Else:
+                            ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(0, 0, 255)
+                        End If
+                        letterExist = True
                     End If
-                    letterExist = True
                 End If
             Next k
         Next i
@@ -1448,7 +1556,7 @@ Private Sub toggleBonusRound(i As Boolean)
 End Sub
 
 Sub bonusRoundBlock()
-    MsgBox ("Please reset the bonus round timer before switching rounds.")
+    MsgBox "Please reset the bonus round timer before switching rounds.", 0, "Exit Bonus Round Error"
 End Sub
 
 Sub randomSpin()
@@ -1547,8 +1655,8 @@ Private Sub setValuePanelDisplay()
     End If
     If letterCounter.Text <> "" And IsNumeric(letterCounter.Text) Then
         If spunWheelValue.Text = "10000" Then
-            ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text _
-        & " (no multiplier)"
+            ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = "** " & ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text _
+        & " **"
         Else:
             ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text _
         & " * " & letterCounter.Text & " = $" & CLng(effectiveWheelValue) * CLng(letterCounter.Text)
@@ -1753,4 +1861,40 @@ Sub TogglePlayers()
             .Shapes("AddRemovePlayers").TextFrame.TextRange.Text = "+"
         End With
     End If
+End Sub
+
+Sub ExplainVowelPrice()
+    MsgBox "Choose how much it costs to buy a vowel.", 0, "Vowel Price Setting"
+End Sub
+
+Sub ExplainHouseMinimum()
+    MsgBox "Choose how much the player wins if their round total is below the given amount.", 0, "House Minimum Setting"
+End Sub
+
+Sub ExplainShotClock()
+    MsgBox "Add an optional in-game timer to the puzzle board with a given amount of seconds. Use it to enforce time limits on player decisions.", 0, "Shot Clock Setting"
+End Sub
+
+Sub ExplainBlueTiles()
+    MsgBox "When a correct letter is called in the puzzle, choose whether the puzzle board tiles light up blue (requiring a click to reveal the letter) or if the letters show up instantly.", 0, "Blue Tiles Setting"
+End Sub
+
+Sub ExplainConfirmSolve()
+    MsgBox "Choose whether or not to get a confirmation box when clicking the solve puzzle button.", 0, "Confirm Solve Setting"
+End Sub
+
+Sub ExplainWheelItems()
+    MsgBox "When a player earns a wheel item (Wild Card, $10,000 Wedge, Gift Tag), choose whether the game removes the item from the wheel (claimable once) or leaves it for others to earn (multi-claimable).", 0, "Wheel Items Setting"
+End Sub
+
+Sub ExplainWheelValues()
+    MsgBox "Choose whether the minimum monetary value on the wheel is $500 or $300.", 0, "Wheel Values Setting"
+End Sub
+
+Sub ExplainBackdrop()
+    MsgBox "Choose the background scenery of the puzzle board and wheel.", 0, "Backdrop Setting"
+End Sub
+
+Sub ExplainSpanishN()
+    MsgBox "If your puzzles are in Spanish, enable this setting to make — a selectable letter.", 0, "Spanish — Setting"
 End Sub
