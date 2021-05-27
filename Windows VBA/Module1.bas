@@ -791,8 +791,8 @@ Private Sub loadPuzzle(i As Integer)
             If isLetter(ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text) = False Then
                 ActivePresentation.Slides(2).Shapes("PuzzleBoard" & j).TextFrame.TextRange.Text = ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text
             End If
-            If ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text = "—" And _
-            ActivePresentation.Slides(9).Shapes("Spanish—").TextFrame.TextRange.Text = "off" Then
+            If ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text = ActivePresentation.Slides(9).Shapes("SpanN").TextFrame.TextRange.Text And _
+            ActivePresentation.Slides(9).Shapes("SpanishN").TextFrame.TextRange.Text = "off" Then
                SpanishNError = True
                toggleSpanishN
             End If
@@ -800,7 +800,7 @@ Private Sub loadPuzzle(i As Integer)
     Next j
     ActivePresentation.Slides(2).Shapes("CategoryBox").TextFrame.TextRange.Text = ActivePresentation.Slides(11 + PuzzleNumberIndex).Shapes("PuzzleCategory" & i).TextFrame.TextRange.Text
     For k = 1 To 27
-        If k < 27 Or (k = 27 And ActivePresentation.Slides(9).Shapes("Spanish—").TextFrame.TextRange.Text = "on") Then
+        If k < 27 Or (k = 27 And ActivePresentation.Slides(9).Shapes("SpanishN").TextFrame.TextRange.Text = "on") Then
             ActivePresentation.Slides(2).Shapes("Letter" & k).Visible = True
         End If
     Next k
@@ -812,8 +812,9 @@ Private Sub loadPuzzle(i As Integer)
     ActivePresentation.Slides(2).Shapes("NextPuzzleToLoad").TextFrame.TextRange.Text = i + 1
     ActivePresentation.Slides(10).Shapes("LoadPuzzleChime").ActionSettings(ppMouseClick).SoundEffect.Play
     If SpanishNError Then
-        MsgBox "This puzzle uses the letter —, but the Spanish — setting was disabled. This setting has automatically been enabled." & vbNewLine & vbNewLine & _
-        "You can re-disable the Spanish — in the Settings slide.", 0, "Spanish — Note"
+        MsgBox "This puzzle uses the letter " & ActivePresentation.Slides(9).Shapes("SpanN").TextFrame.TextRange.Text & ", but the Spanish " _
+        & ActivePresentation.Slides(9).Shapes("SpanN").TextFrame.TextRange.Text & " setting was disabled. This setting has automatically been enabled." & vbNewLine & vbNewLine & _
+        "You can re-disable the Spanish " & ActivePresentation.Slides(9).Shapes("SpanN").TextFrame.TextRange.Text & " in the Settings slide.", 0, "Spanish " & ActivePresentation.Slides(9).Shapes("SpanN").TextFrame.TextRange.Text & " Note"
     End If
     Exit Sub
 errHandler:
@@ -844,10 +845,10 @@ End Sub
 
 Private Function isLetter(strValue As String) As Boolean
     Dim i As Integer
-    Dim extendedChars As Variant
-    extendedChars = Array("¡", "¿", "¬", "ƒ", "«", "…", "»", " ", "À", "Õ", "Ã", "Œ", "œ", "—", "”", "“", "‘", "÷", "⁄", "Ÿ", "€", "‹")
+    Dim extendedChars As String
+    extendedChars = ActivePresentation.Slides(9).Shapes("ExtendedChars").TextFrame.TextRange.Text
     For i = 1 To Len(strValue)
-        If (Asc(Mid(strValue, 1, 1)) < 65 Or Asc(Mid(strValue, 1, 1)) > 90) And Not isInArray(Mid(strValue, 1, 1), extendedChars) Then
+        If (Asc(Mid(strValue, 1, 1)) < 65 Or Asc(Mid(strValue, 1, 1)) > 90) And InStr(extendedChars, Mid(strValue, 1, 1)) = 0 Then
             isLetter = False
         Else:
             isLetter = True
@@ -869,24 +870,24 @@ Private Function isVowel(strValue As String) As Boolean
 End Function
 
 Private Function lettersMatch(letter1 As String, letterSelectorLetter As String) As Boolean
-    Dim extendedChars As Variant
+    Dim extendedChars As String
     Select Case letterSelectorLetter
         Case "A"
-            extendedChars = Array("A", "¡", "¿", "¬", "ƒ")
+            extendedChars = ActivePresentation.Slides(9).Shapes("AChars").TextFrame.TextRange.Text
         Case "C"
-            extendedChars = Array("C", "«")
+            extendedChars = ActivePresentation.Slides(9).Shapes("CChars").TextFrame.TextRange.Text
         Case "E"
-            extendedChars = Array("E", "…", "»", " ", "À")
+            extendedChars = ActivePresentation.Slides(9).Shapes("EChars").TextFrame.TextRange.Text
         Case "I"
-            extendedChars = Array("I", "Õ", "Ã", "Œ", "œ")
+            extendedChars = ActivePresentation.Slides(9).Shapes("IChars").TextFrame.TextRange.Text
         Case "O"
-            extendedChars = Array("O", "”", "“", "‘", "÷")
+            extendedChars = ActivePresentation.Slides(9).Shapes("OChars").TextFrame.TextRange.Text
         Case "U"
-            extendedChars = Array("U", "⁄", "Ÿ", "€", "‹")
+            extendedChars = ActivePresentation.Slides(9).Shapes("UChars").TextFrame.TextRange.Text
         Case Else
-            extendedChars = Array(letterSelectorLetter)
+            extendedChars = letterSelectorLetter
     End Select
-    If isInArray(letter1, extendedChars) Then
+    If InStr(extendedChars, letter1) > 0 Then
         lettersMatch = True
     Else:
         lettersMatch = False
@@ -1034,7 +1035,7 @@ End Sub
 
 Private Sub bringLetterBack(i As Integer)
     If i = 27 Then
-        ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = "—"
+        ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = ActivePresentation.Slides(9).Shapes("SpanN").TextFrame.TextRange.Text
     Else:
         ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = Chr(i + 64)
     End If
@@ -1123,14 +1124,14 @@ Sub toggleOnOff(oClickedShape As Shape)
 End Sub
 
 Sub toggleSpanishN()
-    If ActivePresentation.Slides(9).Shapes("Spanish—").TextFrame.TextRange.Text = "on" Then
-        ActivePresentation.Slides(9).Shapes("Spanish—").TextFrame.TextRange.Text = "off"
-        ActivePresentation.Slides(9).Shapes("Spanish—").Fill.ForeColor.RGB = RGB(217, 150, 148)
+    If ActivePresentation.Slides(9).Shapes("SpanishN").TextFrame.TextRange.Text = "on" Then
+        ActivePresentation.Slides(9).Shapes("SpanishN").TextFrame.TextRange.Text = "off"
+        ActivePresentation.Slides(9).Shapes("SpanishN").Fill.ForeColor.RGB = RGB(217, 150, 148)
         ActivePresentation.Slides(2).Shapes("Letter27").Visible = False
         ActivePresentation.Slides(2).Shapes("LetterSecondRowGroup").Left = 30.18748
     Else:
-        ActivePresentation.Slides(9).Shapes("Spanish—").TextFrame.TextRange.Text = "on"
-        ActivePresentation.Slides(9).Shapes("Spanish—").Fill.ForeColor.RGB = RGB(195, 214, 155)
+        ActivePresentation.Slides(9).Shapes("SpanishN").TextFrame.TextRange.Text = "on"
+        ActivePresentation.Slides(9).Shapes("SpanishN").Fill.ForeColor.RGB = RGB(195, 214, 155)
         If ActivePresentation.Slides(2).Shapes("Letter1").Visible = True Then
             ActivePresentation.Slides(2).Shapes("Letter27").Visible = True
         End If
@@ -1884,5 +1885,5 @@ Sub ExplainBackdrop()
 End Sub
 
 Sub ExplainSpanishN()
-    MsgBox "If your puzzles are in Spanish, enable this setting to make — a selectable letter.", 0, "Spanish — Setting"
+    MsgBox "If your puzzles are in Spanish, enable this setting to make " & ActivePresentation.Slides(9).Shapes("SpanN").TextFrame.TextRange.Text & " a selectable letter.", 0, "Spanish " & ActivePresentation.Slides(9).Shapes("SpanN").TextFrame.TextRange.Text & " Setting"
 End Sub
