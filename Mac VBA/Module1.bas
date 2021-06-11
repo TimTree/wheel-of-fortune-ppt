@@ -1323,6 +1323,26 @@ Sub toggleBankrupts(oClickedShape As Shape)
     End If
 End Sub
 
+Sub toggle5Wedge(oClickedShape As Shape)
+  Dim oSh As Shape, i As Integer, j As Integer
+    Dim sText As String
+    For Each oSh In SlideShowWindows(1).View.Slide.Shapes
+        If oSh.Name = oClickedShape.Name Then
+            Exit For
+        End If
+    Next
+    Call toggleOnOff(oSh)
+    If ActivePresentation.Slides(10).Shapes("5Wedge").TextFrame.TextRange.Text = "off" Then
+        For i = 3 To 6
+            ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("Purple5").Fill.Transparency = 1
+        Next i
+    Else:
+        For j = 3 To 6
+            ActivePresentation.Slides(j).Shapes("TheWheel").GroupItems("Purple5").Fill.Transparency = 0
+        Next j
+    End If
+End Sub
+
 Sub toggleWheelItems(oClickedShape As Shape)
   Dim oSh As Shape, i As Integer, j As Integer
     Dim sText As String
@@ -1418,13 +1438,13 @@ Sub editGameName(oClickedShape As Shape)
     Do While InStr(sText, "$") > 0 And sText <> ""
         sText = InputBox("The game name cannot contain the $ sign to prevent confusion with wheel values. Try again:", "Edit Game Name", sText)
     Loop
-    If sText = "" Then
+    If Trim(sText) = "" Then
         Exit Sub
     Else:
         If ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = oSh.TextFrame.TextRange.Text Then
-            ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = UCase(sText)
+            ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = Trim(UCase(sText))
         End If
-        oSh.TextFrame.TextRange.Text = UCase(sText)
+        oSh.TextFrame.TextRange.Text = Trim(UCase(sText))
         If UCase(sText) <> "WHEEL OF FORTUNE" Then
             ActivePresentation.Slides(1).Shapes("WheelofFortuneLogo").Visible = False
         Else:
@@ -2368,9 +2388,9 @@ Sub ExplainClaimable()
     MsgBox "When a player collects a wheel item, choose whether the game removes the item from the wheel (claimable once) or leaves it for others to earn (claimable multiple). The default is once.", 0, "Claimable Setting"
 End Sub
 
-Sub ExplainMinimumValue()
-    MsgBox "Choose whether the minimum monetary value on the wheel is $300 or $500. The default is $500." & vbNewLine & vbNewLine & _
-    "The $300 min offers a wider range of wheel values. The $500 min aligns with the actual show's wheel values (as of this writing).", 0, "Minimum Value Setting"
+Sub ExplainBaseValue()
+    MsgBox "Choose whether the base monetary value on the wheel is $300 or $500. The default is $300." & vbNewLine & vbNewLine & _
+    "The $300 base offers a wider range of wheel values. The $500 base aligns with the actual show's wheel values (as of this writing).", 0, "Base Value Setting"
 End Sub
 
 Sub ExplainBackdrop()
@@ -2410,6 +2430,10 @@ Sub ExplainGiftTag()
     "The Gift Tag is an auxiliary item that gives the player a prize of your choice.", 0, "Gift Tag Setting"
 End Sub
 
+Sub Explain5Wedge()
+    MsgBox "Optionally place a $5 wedge on the wheel. A joke that's unfortunate and fortunate for the player (at least it's not a Bankrupt)." & vbNewLine & vbNewLine & _
+    "The default is off.", 0, "$5 Wedge Setting"
+End Sub
 
 Sub doFinalSpin()
     ActivePresentation.Slides(2).Shapes("BlackCover").Visible = False

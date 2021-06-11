@@ -99,7 +99,11 @@ Sub youLandedOn(degrees As Integer, wheelType As Integer)
             ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$400"
         End If
     Case 2550 To 2699
-        ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$500"
+        If ActivePresentation.Slides(10).Shapes("5Wedge").TextFrame.TextRange.Text = "on" Then
+            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$5"
+        Else:
+            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$500"
+        End If
     Case 2700 To 2849
         If ActivePresentation.Slides(10).Shapes("WheelValues").TextFrame.TextRange.Text = "$500" Then
             ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$650"
@@ -144,5 +148,4 @@ Sub youLandedOn(degrees As Integer, wheelType As Integer)
         End If
     End Select
 End Sub
-
 
