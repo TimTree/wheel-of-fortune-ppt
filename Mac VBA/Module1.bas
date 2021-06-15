@@ -46,7 +46,7 @@ Sub BGChange()
         wheelGradientMiddle = RGB(34, 138, 46)
         wheelGradientTop = RGB(44, 87, 17)
         categoryColor = RGB(27, 91, 33)
-        letterSelectorColor = RGB(185, 205, 229)
+        letterSelectorColor = RGB(139, 193, 229)
         helpColor = RGB(44, 64, 58)
         themeNumber.Text = "stadium"
     ElseIf themeNumber.Text = "stadium" Then
@@ -1025,6 +1025,7 @@ errHandler:
 End Sub
 
 Sub revealLetter(oSh As Shape)
+On Error GoTo errHandler
     If ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Puzzle" Then
         LoadPuzzleOrSolve
     Else:
@@ -1039,6 +1040,7 @@ Sub revealLetter(oSh As Shape)
             If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(0, 0, 255) Then
                 ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text
                 ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(255, 255, 255)
+                Exit Sub
             ElseIf ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB <> RGB(24, 154, 80) Then
                 ' If a letter was already selected in letter selector, do nothing
                 Dim k As Integer
@@ -1079,12 +1081,26 @@ notValidTossUpValue:
                         ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True
                     Next m
                 End If
+                Dim n As Integer, isFirstReveal As Boolean
+                isFirstReveal = True
+                For n = 1 To 52
+                    If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & n).Fill.ForeColor.RGB = RGB(255, 255, 255) Then
+                        If isLetter(ActivePresentation.Slides(2).Shapes("PuzzleBoard" & n).TextFrame.TextRange.Text) Then
+                            isFirstReveal = False
+                        End If
+                    End If
+                Next n
                 ' Reveal letter
                 ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text
-                ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(255, 255, 255)
+                If isFirstReveal Then
+                    ActivePresentation.Slides(11).Shapes("TossUpMusic").ActionSettings(ppMouseClick).SoundEffect.Play
+                    Exit Sub
+                End If
             End If
         End If
     End If
+errHandler:
+    Exit Sub
 End Sub
 
 Private Sub bringLetterBack(i As Integer)
@@ -1605,6 +1621,7 @@ Private Sub puzzleScribe2(clearBoard As Boolean)
     Dim sText As String, isValidPuzzle As Boolean, puzzleSplitted As Variant
     Dim i As Integer, iPointer As Integer
     Dim puzzleRowLengths(3) As Variant
+    Dim erroredRow As Integer
     isValidPuzzle = False
     sText = InputBox("Type your puzzle here, and it'll automatically write onto the tiles. Separate rows with |." & vbNewLine & vbNewLine & _
     "Example" & vbNewLine & "puzzle scribe | saves me time", "Puzzle Scribe")
@@ -1614,6 +1631,7 @@ Private Sub puzzleScribe2(clearBoard As Boolean)
             puzzleRowLengths(0) = -1
             For i = LBound(puzzleSplitted) To UBound(puzzleSplitted)
                 If Len(Trim(puzzleSplitted(i))) > 14 Then
+                    erroredRow = i + 1
                     GoTo notValidPuzzle
                 Else:
                     puzzleRowLengths(i + 1) = Len(Trim(puzzleSplitted(i)))
@@ -1625,12 +1643,14 @@ Private Sub puzzleScribe2(clearBoard As Boolean)
             iPointer = 0
             For i = LBound(puzzleSplitted) To UBound(puzzleSplitted)
                 If Len(Trim(puzzleSplitted(i))) > 14 Then
+                    erroredRow = i + 1
                     GoTo notValidPuzzle
                 ElseIf Len(Trim(puzzleSplitted(i))) > 12 Then
                     If iPointer = 0 Then
                         puzzleRowLengths(0) = -1
                         iPointer = 1
                     ElseIf iPointer = 3 Then
+                        erroredRow = i + 1
                         GoTo notValidPuzzle
                     End If
                         puzzleRowLengths(iPointer) = Len(Trim(puzzleSplitted(i)))
@@ -1646,9 +1666,11 @@ Private Sub puzzleScribe2(clearBoard As Boolean)
         ElseIf UBound(puzzleSplitted) + 1 = 4 Then
             For i = LBound(puzzleSplitted) To UBound(puzzleSplitted)
                 If Len(Trim(puzzleSplitted(i))) > 14 Then
+                    erroredRow = i + 1
                     GoTo notValidPuzzle
                 ElseIf Len(Trim(puzzleSplitted(i))) > 12 Then
                     If i = 0 Or i = 3 Then
+                        erroredRow = i + 1
                         GoTo notValidPuzzle
                     Else:
                         puzzleRowLengths(i) = Len(Trim(puzzleSplitted(i)))
@@ -1659,12 +1681,19 @@ Private Sub puzzleScribe2(clearBoard As Boolean)
             Next i
             Exit Do
         Else:
+            erroredRow = 5
             GoTo notValidPuzzle
         End If
 notValidPuzzle:
-        sText = InputBox("At least one of the rows is too long for the puzzle board, or the puzzle has more than 4 rows. Try again." & vbNewLine & vbNewLine & _
-        "Type your puzzle here, and it'll automatically write onto the tiles. Separate rows with |." & vbNewLine & vbNewLine & _
-        "Example" & vbNewLine & "puzzle scribe | saves me time", "Puzzle Scribe", sText)
+        If erroredRow < 5 Then
+            sText = InputBox("Row " & erroredRow & " is too long for the puzzle board. Try again." & vbNewLine & vbNewLine & _
+            "Type your puzzle here, and it'll automatically write onto the tiles. Separate rows with |." & vbNewLine & vbNewLine & _
+            "Example" & vbNewLine & "puzzle scribe | saves me time", "Puzzle Scribe", sText)
+        Else:
+            sText = InputBox("This puzzle has more than the allowed four rows. Try again." & vbNewLine & vbNewLine & _
+            "Type your puzzle here, and it'll automatically write onto the tiles. Separate rows with |." & vbNewLine & vbNewLine & _
+            "Example" & vbNewLine & "puzzle scribe | saves me time", "Puzzle Scribe", sText)
+        End If
     Loop
     If sText = "" Then
         Exit Sub
@@ -2449,4 +2478,40 @@ Sub manualFinalSpin()
     ActivePresentation.Slides(2).Shapes("BlackCover").Visible = False
     ActivePresentation.Slides(2).Shapes("FinalSpinBanner").Visible = False
     ActivePresentation.Slides(2).Shapes("ManualFinalSpin").Visible = False
+End Sub
+
+Sub revealTossUpLetter()
+    On Error GoTo errHandler
+    Dim blankTiles As Variant, i As Integer, rand As Integer, isFirstReveal As Boolean
+    isFirstReveal = True
+    For i = 1 To 52
+        If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(255, 255, 255) Then
+            If isLetter(ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text) Then
+                isFirstReveal = False
+            End If
+            If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text = "" Then
+                If IsEmpty(blankTiles) Then
+                    ReDim blankTiles(0)
+                    blankTiles(0) = i
+                Else:
+                    ReDim Preserve blankTiles(UBound(blankTiles) + 1)
+                    blankTiles(UBound(blankTiles)) = i
+                End If
+            End If
+        End If
+    Next i
+    If IsEmpty(blankTiles) Then
+        MsgBox "There are no more letters to reveal in this puzzle.", 0, "Reveal a Letter Error"
+        Exit Sub
+    Else:
+        Randomize
+        rand = Int((UBound(blankTiles) + 1) * Rnd)
+        ActivePresentation.Slides(2).Shapes("PuzzleBoard" & blankTiles(rand)).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & blankTiles(rand)).TextFrame.TextRange.Text
+        If isFirstReveal Then
+            ActivePresentation.Slides(11).Shapes("TossUpMusic").ActionSettings(ppMouseClick).SoundEffect.Play
+            Exit Sub
+        End If
+    End If
+errHandler:
+    Exit Sub
 End Sub
