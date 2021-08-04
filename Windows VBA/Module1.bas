@@ -9,8 +9,7 @@ Sub goToHowToUse()
         MsgBox "PowerPoint 2007 is no longer supported. Upgrade to 2010 or newer, or download an earlier version of Wheel of Fortune for PowerPoint.", 0, "PowerPoint 2007 Not Supported"
         Exit Sub
     End If
-    savePuzzle
-    shadeOccupiedPuzzles
+    savePuzzleAndShadeOccupiedPuzzles
     ActivePresentation.SlideShowSettings.Run.View.PointerType = ppSlideShowPointerArrow
     SlideShowWindows(1).View.GotoSlide 18 + ActivePresentation.SectionProperties.SlidesCount(4)
 End Sub
@@ -23,8 +22,7 @@ Sub goToSetUp()
         MsgBox "PowerPoint 2007 is no longer supported. Upgrade to 2010 or newer, or download an earlier version of Wheel of Fortune for PowerPoint.", 0, "PowerPoint 2007 Not Supported"
         Exit Sub
     End If
-    savePuzzle
-    shadeOccupiedPuzzles
+    savePuzzleAndShadeOccupiedPuzzles
     ActivePresentation.SlideShowSettings.Run.View.PointerType = ppSlideShowPointerArrow
     SlideShowWindows(1).View.GotoSlide 7
 End Sub
@@ -37,8 +35,7 @@ Sub goToPuzzleBoard()
         MsgBox "PowerPoint 2007 is no longer supported. Upgrade to 2010 or newer, or download an earlier version of Wheel of Fortune for PowerPoint.", 0, "PowerPoint 2007 Not Supported"
         Exit Sub
     End If
-    savePuzzle
-    shadeOccupiedPuzzles
+    savePuzzleAndShadeOccupiedPuzzles
     ActivePresentation.SlideShowSettings.Run.View.PointerType = ppSlideShowPointerArrow
     SlideShowWindows(1).View.GotoSlide 2
 End Sub
@@ -516,9 +513,7 @@ Sub puzzleSetupFromOtherSlide(oClickedShape As Shape)
             Exit For
         End If
     Next
-    savePuzzle
     placePuzzleToSetUp (CInt(oSh.TextFrame.TextRange.Text))
-    shadeOccupiedPuzzles
     highlightCurrentPuzzle (CInt(oSh.TextFrame.TextRange.Text))
     SlideShowWindows(1).View.GotoSlide 8
     Exit Sub
@@ -535,15 +530,14 @@ Sub puzzleSetup(oClickedShape As Shape)
             Exit For
         End If
     Next
-    savePuzzle
+    savePuzzleAndShadeOccupiedPuzzles
     placePuzzleToSetUp (CInt(oSh.TextFrame.TextRange.Text))
-    shadeOccupiedPuzzles
     highlightCurrentPuzzle (CInt(oSh.TextFrame.TextRange.Text))
 End Sub
 
 Sub puzzleSetupJump(num As Integer)
     placePuzzleToSetUp (num)
-    shadeOccupiedPuzzles
+    shadeOccupiedPuzzlesFull
     highlightCurrentPuzzle (num)
     SlideShowWindows(1).View.GotoSlide 8
 End Sub
@@ -672,10 +666,49 @@ Private Sub deleteAllPuzzles()
     Next k
     ActivePresentation.Slides(8).Shapes("CategoryBox").OLEFormat.Object.Value = ""
     exactPuzzleRow (0)
-    shadeOccupiedPuzzles
+    shadeOccupiedPuzzlesFull
 End Sub
 
-Private Sub shadeOccupiedPuzzles()
+Private Sub savePuzzleAndShadeOccupiedPuzzles()
+    Dim PuzzleIndex As Integer, r As Integer, blankPuzzle As Boolean, i As Integer, j As Integer, thereWasAPuzzle As Boolean
+    PuzzleIndex = CInt(ActivePresentation.Slides(7).Shapes("CurrentPuzzleRowIndex").TextFrame.TextRange.Text)
+    thereWasAPuzzle = False
+    blankPuzzle = True
+    For i = 1 To 12
+        If ActivePresentation.Slides(8).Shapes("LinkTo" & CStr(i + (12 * PuzzleIndex))).Fill.ForeColor.RGB = RGB(250, 192, 144) Then
+            thereWasAPuzzle = True
+            Exit For
+        End If
+    Next i
+    If thereWasAPuzzle = True Then
+        For j = 1 To 52
+            ActivePresentation.Slides(12 + PuzzleIndex).Shapes("PuzzleSolution" & CStr(i + (12 * PuzzleIndex)) & "-" & CStr(j)).TextFrame.TextRange.Text = ActivePresentation.Slides(8).Shapes("BoardTile" & CStr(j)).OLEFormat.Object.Value
+            ActivePresentation.Slides(12 + PuzzleIndex).Shapes("PuzzleSolution" & CStr(i + (12 * PuzzleIndex)) & "-" & CStr(j)).Fill.ForeColor.RGB = ActivePresentation.Slides(8).Shapes("BoardTile" & CStr(j)).OLEFormat.Object.BackColor
+            If ActivePresentation.Slides(12 + PuzzleIndex).Shapes("PuzzleSolution" & CStr(i + (12 * PuzzleIndex)) & "-" & CStr(j)).TextFrame.TextRange.Text <> "" Then
+                blankPuzzle = False
+            End If
+        Next j
+        ActivePresentation.Slides(12 + PuzzleIndex).Shapes("PuzzleCategory" & CStr(i + (12 * PuzzleIndex))).TextFrame.TextRange.Text = ActivePresentation.Slides(8).Shapes("CategoryBox").OLEFormat.Object.Value
+        If ActivePresentation.Slides(12 + PuzzleIndex).Shapes("PuzzleCategory" & CStr(i + (12 * PuzzleIndex))).TextFrame.TextRange.Text <> "" Then
+            blankPuzzle = False
+        End If
+        For r = 7 To 9
+           If blankPuzzle = False Then
+               With ActivePresentation.Slides(r).Shapes("LinkTo" & CStr(i + (12 * PuzzleIndex)))
+                   .Fill.ForeColor.RGB = RGB(146, 224, 204)
+                   .Line.ForeColor.RGB = RGB(55, 96, 146)
+               End With
+           Else:
+               With ActivePresentation.Slides(r).Shapes("LinkTo" & CStr(i + (12 * PuzzleIndex)))
+                   .Fill.ForeColor.RGB = RGB(149, 179, 215)
+                   .Line.ForeColor.RGB = RGB(55, 96, 146)
+               End With
+           End If
+        Next r
+    End If
+End Sub
+
+Private Sub shadeOccupiedPuzzlesFull()
     Dim PuzzleIndex As Integer, p As Integer, q As Integer, r As Integer, blankPuzzle As Boolean
     PuzzleIndex = CInt(ActivePresentation.Slides(7).Shapes("CurrentPuzzleRowIndex").TextFrame.TextRange.Text)
     For p = 1 To 12
@@ -716,8 +749,7 @@ End Sub
 
 Sub OnSlideShowTerminate(oWn As SlideShowWindow)
     removeWheelAnimations
-    savePuzzle
-    shadeOccupiedPuzzles
+    savePuzzleAndShadeOccupiedPuzzles
     resetBonusRound
     toggleBonusRound (False)
     toggleFourthRound (False)
@@ -725,20 +757,17 @@ Sub OnSlideShowTerminate(oWn As SlideShowWindow)
 End Sub
 
 Sub goToHowToUseFromSetUpPuzzles()
-    savePuzzle
-    shadeOccupiedPuzzles
+    savePuzzleAndShadeOccupiedPuzzles
     SlideShowWindows(1).View.GotoSlide 18 + ActivePresentation.SectionProperties.SlidesCount(4)
 End Sub
 
 Sub goToPuzzleBoardFromSetUpPuzzles()
-    savePuzzle
-    shadeOccupiedPuzzles
+    savePuzzleAndShadeOccupiedPuzzles
     SlideShowWindows(1).View.GotoSlide 2
 End Sub
 
 Sub goToSettingsFromSetUpPuzzles()
-    savePuzzle
-    shadeOccupiedPuzzles
+    savePuzzleAndShadeOccupiedPuzzles
     SlideShowWindows(1).View.GotoSlide 9
 End Sub
 
@@ -1592,7 +1621,7 @@ Sub puzzleScribe()
         End If
     Next i
     If scribeWarning = True Then
-        scribeWarningConfirm = MsgBox("Warning: Puzzle Scribe will overwrite the existing puzzle. Do you want to continue?", vbYesNo + vbDefaultButton2, "Puzzle Scribe Overwrite Warning")
+        scribeWarningConfirm = MsgBox("Warning: Puzzle Scribe will overwrite the existing puzzle. Do you want to continue?", vbYesNo + vbDefaultButton1, "Puzzle Scribe Overwrite Warning")
         If scribeWarningConfirm = vbYes Then
             puzzleScribe2 (True)
             Exit Sub
@@ -2179,14 +2208,16 @@ Private Sub addPuzzleRow(num As Integer)
         ActivePresentation.Slides(13).Shapes("Swap" & k).Name = "Swap" & (k + (12 * num))
         ActivePresentation.Slides(13).Shapes("PuzzleCategory" & k).TextFrame.TextRange.Text = ""
         ActivePresentation.Slides(13).Shapes("PuzzleCategory" & k).Name = "PuzzleCategory" & (k + (12 * num))
-        ActivePresentation.Slides(13).Shapes("PrevAllPuzzles").Visible = msoTrue
-        ActivePresentation.Slides(13).Shapes("NextAllPuzzles").Visible = msoFalse
         For l = 1 To 52
-            ActivePresentation.Slides(13).Shapes("PuzzleSolution" & CStr(k) & "-" & CStr(l)).TextFrame.TextRange.Text = ""
-            ActivePresentation.Slides(13).Shapes("PuzzleSolution" & CStr(k) & "-" & CStr(l)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+            If ActivePresentation.Slides(13).Shapes("PuzzleSolution" & CStr(k) & "-" & CStr(l)).TextFrame.TextRange.Text <> "" Then
+                ActivePresentation.Slides(13).Shapes("PuzzleSolution" & CStr(k) & "-" & CStr(l)).TextFrame.TextRange.Text = ""
+                ActivePresentation.Slides(13).Shapes("PuzzleSolution" & CStr(k) & "-" & CStr(l)).Fill.ForeColor.RGB = RGB(24, 154, 80)
+            End If
             ActivePresentation.Slides(13).Shapes("PuzzleSolution" & CStr(k) & "-" & CStr(l)).Name = "PuzzleSolution" & CStr(k + (12 * num)) & "-" & CStr(l)
         Next l
     Next k
+    ActivePresentation.Slides(13).Shapes("PrevAllPuzzles").Visible = msoTrue
+    ActivePresentation.Slides(13).Shapes("NextAllPuzzles").Visible = msoFalse
     ActivePresentation.Slides(13).MoveTo toPos:=12 + ActivePresentation.SectionProperties.SlidesCount(4) - 1
     ActivePresentation.Slides(12 + ActivePresentation.SectionProperties.SlidesCount(4) - 2).Shapes("NextAllPuzzles").Visible = msoTrue
 End Sub
@@ -2195,6 +2226,10 @@ Sub nextPuzzleRow()
     Dim r As Integer, p As Integer, RowIndex As Integer
     savePuzzle
     RowIndex = CInt(ActivePresentation.Slides(7).Shapes("CurrentPuzzleRowIndex").TextFrame.TextRange.Text)
+    ActivePresentation.Slides(7).Shapes("CurrentPuzzleRowIndex").TextFrame.TextRange.Text = RowIndex + 1
+    If ActivePresentation.SectionProperties.SlidesCount(4) <= RowIndex + 1 Then
+        addPuzzleRow (RowIndex + 1)
+    End If
     For r = 7 To 9
         For p = 1 To 12
             With ActivePresentation.Slides(r).Shapes("LinkTo" & CStr(p + (12 * RowIndex)))
@@ -2204,10 +2239,6 @@ Sub nextPuzzleRow()
         Next p
         ActivePresentation.Slides(r).Shapes("PrevPuzzleRow").Visible = msoTrue
     Next r
-    ActivePresentation.Slides(7).Shapes("CurrentPuzzleRowIndex").TextFrame.TextRange.Text = RowIndex + 1
-    If ActivePresentation.SectionProperties.SlidesCount(4) <= RowIndex + 1 Then
-        addPuzzleRow (RowIndex + 1)
-    End If
     puzzleSetupJump (1 + (12 * (RowIndex + 1)))
 End Sub
 
@@ -2215,6 +2246,7 @@ Sub prevPuzzleRow()
     Dim r As Integer, p As Integer, RowIndex As Integer
     savePuzzle
     RowIndex = CInt(ActivePresentation.Slides(7).Shapes("CurrentPuzzleRowIndex").TextFrame.TextRange.Text)
+    ActivePresentation.Slides(7).Shapes("CurrentPuzzleRowIndex").TextFrame.TextRange.Text = RowIndex - 1
     For r = 7 To 9
         For p = 1 To 12
             With ActivePresentation.Slides(r).Shapes("LinkTo" & CStr(p + (12 * RowIndex)))
@@ -2226,9 +2258,7 @@ Sub prevPuzzleRow()
             ActivePresentation.Slides(r).Shapes("PrevPuzzleRow").Visible = msoFalse
         End If
     Next r
-    ActivePresentation.Slides(7).Shapes("CurrentPuzzleRowIndex").TextFrame.TextRange.Text = RowIndex - 1
     puzzleSetupJump (1 + (12 * (RowIndex - 1)))
-    
 End Sub
 
 Private Sub exactPuzzleRow(num As Integer)
@@ -2497,4 +2527,6 @@ Sub revealTossUpLetter()
 errHandler:
     Exit Sub
 End Sub
+
+
 
