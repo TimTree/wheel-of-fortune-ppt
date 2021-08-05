@@ -771,6 +771,12 @@ Sub goToSettingsFromSetUpPuzzles()
     SlideShowWindows(1).View.GotoSlide 9
 End Sub
 
+Sub goToSettingsFromAllPuzzles()
+    savePuzzle
+    shadeOccupiedPuzzlesFull
+    SlideShowWindows(1).View.GotoSlide 9
+End Sub
+
 Private Function puzzleExists(i As Integer) As Boolean
     Dim PuzzleNumberIndex As Integer, puzzleBoolean As Boolean, m As Integer
     PuzzleNumberIndex = Int((i - 1) / 12)
