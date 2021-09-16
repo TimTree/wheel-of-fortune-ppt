@@ -799,17 +799,19 @@ End Function
 
 Sub LoadPuzzleOrSolve()
     If ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Puzzle" Then
-        Dim noPuzzlesExist As Boolean, numAllPuzzlesSlides As Integer, numberToLoad, j As Integer, m As Integer
+        Dim noPuzzlesExist As Boolean, numAllPuzzlesSlides As Integer, numberToLoad, j As Integer
         noPuzzlesExist = True
         numAllPuzzlesSlides = ActivePresentation.SectionProperties.SlidesCount(4)
-        For m = 0 To numAllPuzzlesSlides - 1
-            For j = (1 + (12 * m)) To (12 + (12 * m))
+        If numAllPuzzlesSlides = 1 Then
+            For j = 1 To 12
                 If puzzleExists(j) = True Then
                     noPuzzlesExist = False
                     Exit For
                 End If
             Next j
-        Next m
+        Else: ' For performance reasons, don't run puzzles exist check if there's more than 1 puzzle page (implies user already saw Set Up Puzzles)
+            noPuzzlesExist = False
+        End If
         If noPuzzlesExist = True Then
             MsgBox "No puzzles were found. Create puzzles using Set Up Puzzles on the top right of this slide.", 0, "Load Puzzle"
             Exit Sub
@@ -1303,15 +1305,15 @@ End Sub
 
 Sub toggleWheelValues()
     Dim i As Integer, j As Integer, k As Integer, m As Integer
-    If ActivePresentation.Slides(10).Shapes("WheelValues").TextFrame.TextRange.Text = "$500" Then
-        ActivePresentation.Slides(10).Shapes("WheelValues").TextFrame.TextRange.Text = "$300"
+    If ActivePresentation.Slides(10).Shapes("WheelValues").TextFrame.TextRange.Text = "$500-$900" Then
+        ActivePresentation.Slides(10).Shapes("WheelValues").TextFrame.TextRange.Text = "$300-$900"
         For i = 3 To 6
             For j = 1 To 7
                 ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("ClassicWedge" & CStr(j)).Fill.Transparency = 0
             Next j
         Next i
     Else:
-        ActivePresentation.Slides(10).Shapes("WheelValues").TextFrame.TextRange.Text = "$500"
+        ActivePresentation.Slides(10).Shapes("WheelValues").TextFrame.TextRange.Text = "$500-$900"
         For k = 3 To 6
             For m = 1 To 7
                 ActivePresentation.Slides(k).Shapes("TheWheel").GroupItems("ClassicWedge" & CStr(m)).Fill.Transparency = 1
@@ -1331,11 +1333,11 @@ Sub toggleFreePlay(oClickedShape As Shape)
     Call toggleOnOff(oSh)
     If ActivePresentation.Slides(10).Shapes("FreePlayWedge").TextFrame.TextRange.Text = "off" Then
         For i = 3 To 6
-            ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("Orange950").Fill.Transparency = 0
+            ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("Yellow850").Fill.Transparency = 0
         Next i
     Else:
         For j = 3 To 6
-            ActivePresentation.Slides(j).Shapes("TheWheel").GroupItems("Orange950").Fill.Transparency = 1
+            ActivePresentation.Slides(j).Shapes("TheWheel").GroupItems("Yellow850").Fill.Transparency = 1
         Next j
     End If
 End Sub
@@ -2436,8 +2438,8 @@ Sub ExplainClaimable()
 End Sub
 
 Sub ExplainBaseValue()
-    MsgBox "Choose whether the base monetary value on the wheel is $300 or $500. The default is $300." & vbNewLine & vbNewLine & _
-    "The $300 base offers a wider range of wheel values. The $500 base aligns with the actual show's wheel values (as of this writing).", 0, "Base Value Setting"
+    MsgBox "Choose the range of regular values on the wheel. The default is $300-$900." & vbNewLine & vbNewLine & _
+    "The $500-$900 range represents the show's current wheel (as of this writing).", 0, "Values Range Setting"
 End Sub
 
 Sub ExplainBackdrop()
@@ -2533,6 +2535,3 @@ Sub revealTossUpLetter()
 errHandler:
     Exit Sub
 End Sub
-
-
-
