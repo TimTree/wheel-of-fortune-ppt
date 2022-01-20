@@ -185,6 +185,7 @@ Sub ClearBoardButton()
         ActivePresentation.Slides(2).Shapes("Letter" & j).Visible = False
         bringLetterBack (j)
     Next j
+    ActivePresentation.Slides(2).Shapes("TossUpBanner").GroupItems("TossUpTitle").TextFrame.TextRange.Text = "Toss-Up Puzzle"
     ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = False
     ActivePresentation.Slides(2).Shapes("CategoryBox").TextFrame.TextRange.Text = ""
     ActivePresentation.Slides(2).Shapes("LeftTab").Fill.ForeColor.RGB = RGB(41, 183, 233)
@@ -235,13 +236,13 @@ Sub PlayerRoundDollarSign(oClickedShape As Shape)
         End If
     Next i
     If j = True Then
-        sText = InputBox("Manually edit " & ActivePresentation.Slides(2).Shapes("Player" & i & "Name").TextFrame.TextRange.Text & "'s round score:", "Manually Edit Round Score", ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text)
+        sText = InputBox("Manually edit " & ActivePresentation.Slides(2).Shapes("Player" & i & "Name").TextFrame.TextRange.Text & "'s round score:", "Manually Edit Round Score", CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text))
         Do While IsNumeric(sText) = False And sText <> ""
             sText = InputBox("You can only enter numbers here. Try again:", "Manually Edit Round Score", sText)
         Loop
         If sText = "" Then
         Else:
-            ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = CLng(sText)
+            ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = FormatNumber(CLng(sText), 0)
         End If
     End If
 End Sub
@@ -261,13 +262,13 @@ Sub PlayerTotalsDollarSign(oClickedShape As Shape)
         End If
     Next i
     If j = True Then
-        sText = InputBox("Manually edit " & ActivePresentation.Slides(2).Shapes("Player" & i & "Name").TextFrame.TextRange.Text & "'s totals score:", "Manually Edit Totals Score", ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore").TextFrame.TextRange.Text)
+        sText = InputBox("Manually edit " & ActivePresentation.Slides(2).Shapes("Player" & i & "Name").TextFrame.TextRange.Text & "'s totals score:", "Manually Edit Totals Score", CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore").TextFrame.TextRange.Text))
         Do While IsNumeric(sText) = False And sText <> ""
             sText = InputBox("You can only enter numbers here. Try again:", "Manually Edit Totals Score", sText)
         Loop
         If sText = "" Then
         Else:
-            ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore").TextFrame.TextRange.Text = CLng(sText)
+            ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore").TextFrame.TextRange.Text = FormatNumber(CLng(sText), 0)
         End If
     End If
 End Sub
@@ -304,34 +305,36 @@ Sub PlayerAddFromValuePanel(oClickedShape As Shape)
                 Else:
                     effectiveWheelValue = CLng(ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text)
                 End If
-                If ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = "" Then
+                If InStr(ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text, "Triple") > 0 And _
+                CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) / 2 = CLng(ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text) And _
+                ActivePresentation.Slides(9).Shapes("TripleTossUpBonus").TextFrame.TextRange.Text = "on" Then
                     ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
-                    CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
-                    effectiveWheelValue
+                    FormatNumber(CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
+                    effectiveWheelValue * 3, 0)
+                ElseIf ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = "" Then
+                    ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
+                    FormatNumber(CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
+                    effectiveWheelValue, 0)
                 Else:
-                    If ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = "10000" Then
-                        ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
-                        CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
-                        effectiveWheelValue
-                        If ActivePresentation.Slides(10).Shapes("WheelItems").TextFrame.TextRange.Text = "once" And _
-                        ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = "** $10000 **" Then
-                            If ActivePresentation.Slides(3).Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 0 Then
-                                toggle10000Wedge
-                            End If
-                        End If
-                    Else:
-                        ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
-                        CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
-                        CLng(ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text) * _
-                        effectiveWheelValue
-                    End If
+                    ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
+                    FormatNumber(CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
+                    CLng(ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text) * _
+                    effectiveWheelValue, 0)
                 End If
-            If ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True Then
-                solvePuzzle
-                Exit Sub
-            End If
-            ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
-            setValuePanelDisplay
+                If ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True And (ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Toss-Up Puzzle" Or ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 3") Then
+                    solvePuzzle (True)
+                    Exit Sub
+                ElseIf ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True And (ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 1" Or ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 2") Then
+                    solvePuzzle (False)
+                    Exit Sub
+                End If
+                If ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Puzzle" Then
+                    ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
+                    ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(9).Shapes("GameName").TextFrame.TextRange.Text
+                    Exit Sub
+                End If
+                ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
+                setValuePanelDisplay
             End If
         End If
     End If
@@ -353,10 +356,10 @@ Sub PlayerBuyaVowel(oSh As Shape)
             MsgBox "Please remove non-numeric characters from " + playerName.TextFrame.TextRange.Text + "'s score before buying a vowel." _
             , 0, playerName.TextFrame.TextRange.Text + " Buy Vowel"
         ElseIf CLng(RoundDollarAmount.TextFrame.TextRange.Text) < VOWELCOST Then
-            MsgBox playerName.TextFrame.TextRange.Text + " cannot buy a vowel. Vowels cost $" + CStr(VOWELCOST) + "." _
+            MsgBox playerName.TextFrame.TextRange.Text + " cannot buy a vowel. Vowels cost $" + FormatNumber(CStr(VOWELCOST), 0) + "." _
             , 0, playerName.TextFrame.TextRange.Text + " Buy Vowel"
         ElseIf CLng(RoundDollarAmount.TextFrame.TextRange.Text) >= VOWELCOST Then
-            RoundDollarAmount.TextFrame.TextRange.Text = (CLng(RoundDollarAmount.TextFrame.TextRange.Text) - VOWELCOST)
+            RoundDollarAmount.TextFrame.TextRange.Text = FormatNumber((CLng(RoundDollarAmount.TextFrame.TextRange.Text) - VOWELCOST), 0)
         End If
     End If
 End Sub
@@ -364,6 +367,11 @@ End Sub
 Sub PlayerTransferTotals(oSh As Shape)
     Dim i As Integer, j As Boolean, RoundDollarAmount, TotalsDollarAmount, HOUSEMINIMUM As Long, shouldIHouse
     HOUSEMINIMUM = CLng(Replace(ActivePresentation.Slides(9).Shapes("HouseMinimum").TextFrame.TextRange.Text, "$", ""))
+    If ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Next" Or _
+    (ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True And InStr(ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text, "Triple") > 0) Then
+        MsgBox "Cannot transfer totals until every Triple Toss-Up puzzle is solved.", 0, "Transfer Totals Triple Toss-Up Error"
+        Exit Sub
+    End If
     For i = 1 To 4
         If ActivePresentation.Slides(2).Shapes("Player" & i & "TransferTotalsButton").Name = oSh.Name Then
             j = True
@@ -374,18 +382,22 @@ Sub PlayerTransferTotals(oSh As Shape)
         Set RoundDollarAmount = ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore")
         Set TotalsDollarAmount = ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore")
         If IsNumeric(TotalsDollarAmount.TextFrame.TextRange.Text) = True And IsNumeric(RoundDollarAmount.TextFrame.TextRange.Text) = True Then
-            If CLng(RoundDollarAmount.TextFrame.TextRange.Text) < HOUSEMINIMUM Then
-                shouldIHouse = MsgBox("The house minimum of $" + CStr(HOUSEMINIMUM) + " will be transferred.", vbOKCancel, _
+            If CLng(RoundDollarAmount.TextFrame.TextRange.Text) < HOUSEMINIMUM And ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = "" Then
+                shouldIHouse = MsgBox("The house minimum of $" + FormatNumber(CStr(HOUSEMINIMUM), 0) + " will be transferred.", vbOKCancel, _
                 "Confirm House Minimum Transfer")
                 If shouldIHouse = vbOK Then
-                    TotalsDollarAmount.TextFrame.TextRange.Text = CLng(TotalsDollarAmount.TextFrame.TextRange.Text) + HOUSEMINIMUM
+                    TotalsDollarAmount.TextFrame.TextRange.Text = FormatNumber(CLng(TotalsDollarAmount.TextFrame.TextRange.Text) + HOUSEMINIMUM, 0)
                     wipeRoundScores
                 Else:
                     Exit Sub
                 End If
             Else:
-                TotalsDollarAmount.TextFrame.TextRange.Text = CLng(TotalsDollarAmount.TextFrame.TextRange.Text) + CLng(RoundDollarAmount.TextFrame.TextRange.Text)
-                wipeRoundScores
+                TotalsDollarAmount.TextFrame.TextRange.Text = FormatNumber(CLng(TotalsDollarAmount.TextFrame.TextRange.Text) + CLng(RoundDollarAmount.TextFrame.TextRange.Text), 0)
+                If ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = "" Then
+                    wipeRoundScores
+                Else:
+                    ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = 0
+                End If
             End If
         End If
     End If
@@ -754,6 +766,7 @@ Sub OnSlideShowTerminate(oWn As SlideShowWindow)
     toggleBonusRound (False)
     toggleFourthRound (False)
     ActivePresentation.Slides(1).Shapes("MacroDisabledText").Visible = True
+    ActivePresentation.Slides(2).Shapes("StartedSpecialMusic").TextFrame.TextRange.Text = ""
 End Sub
 
 Sub goToHowToUseFromSetUpPuzzles()
@@ -817,31 +830,34 @@ Sub LoadPuzzleOrSolve()
             Exit Sub
         End If
         numberToLoad = InputBox("Enter the puzzle number to load (1, 2 etc)." & vbNewLine & vbNewLine & _
-        "Append T to the number to load the puzzle as a Toss-Up (1T, 2T, etc).", "Load Puzzle", ActivePresentation.Slides(2).Shapes("NextPuzzleToLoad").TextFrame.TextRange.Text)
+        "Append T to to load the puzzle as a Toss-Up (1T, 2T, etc), TTT to start a Triple Toss-Up sequence (1TTT, 2TTT, etc).", "Load Puzzle", ActivePresentation.Slides(2).Shapes("NextPuzzleToLoad").TextFrame.TextRange.Text)
         Do While IsNumeric(Replace(UCase(numberToLoad), "T", "")) = False:
             If numberToLoad = "" Then
                 Exit Sub
             Else:
-                numberToLoad = InputBox("Please enter a number, or a number with a T:", "Load Puzzle", numberToLoad)
+                numberToLoad = InputBox("Please enter a number, a number with a T (Toss-Up), or a number with a TTT (Triple Toss-Up):", "Load Puzzle", numberToLoad)
             End If
         Loop
-            If InStr(UCase(numberToLoad), "T") > 0 Then
-                Call loadPuzzle(CInt(Replace(UCase(numberToLoad), "T", "")), True)
+            If InStr(UCase(numberToLoad), "TTT") > 0 Then ' Triple Toss-Up
+                Call loadPuzzle(CInt(Replace(UCase(numberToLoad), "T", "")), 3)
+            ElseIf InStr(UCase(numberToLoad), "T") > 0 Then ' Toss-Up
+                Call loadPuzzle(CInt(Replace(UCase(numberToLoad), "T", "")), 1)
             Else:
-                Call loadPuzzle(CInt(numberToLoad), False)
+                Call loadPuzzle(CInt(numberToLoad), 0)
             End If
+    ElseIf ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Next" Then
+        Call loadPuzzle(CInt(ActivePresentation.Slides(2).Shapes("NextPuzzleToLoad").TextFrame.TextRange.Text), 4)
     Else:
         If ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True Then
-            MsgBox "To reveal the Toss-Up, add the Toss-Up value to a player's round score." & vbNewLine & vbNewLine & _
-            "To end the Toss-Up without scoring, use Clear Board on the top right of this slide.", 0, "Solve Toss-Up Puzzle Note"
+            solvePuzzle (False)
         Else:
-            solvePuzzle
+            solvePuzzle (True)
             Exit Sub
         End If
     End If
 End Sub
 
-Private Sub loadPuzzle(i As Integer, isTossUp As Boolean)
+Private Sub loadPuzzle(i As Integer, isTossUp As Integer)
     On Error GoTo errHandler
     Dim SpanishNError As Boolean, sText As String
     SpanishNError = False
@@ -849,22 +865,46 @@ Private Sub loadPuzzle(i As Integer, isTossUp As Boolean)
         MsgBox "No puzzle found for number " & i & ".", 0, "Load Puzzle Error"
         Exit Sub
     End If
-    If isTossUp = True Then
+    If isTossUp = 1 Then
         sText = InputBox("How much is the Toss-Up worth in dollars?", "Set Toss-Up Value", "1000")
         Do Until sText = ""
             If IsNumeric(sText) = False Then
                 GoTo notValidTossUpValue
-            ElseIf CLng(sText) > 10000 Or CLng(sText) < 1 Then
+            ElseIf CLng(sText) < 1 Then
                 GoTo notValidTossUpValue
             Else:
                 Exit Do
             End If
 notValidTossUpValue:
-            sText = InputBox("The Toss-Up value must be a number between 1 and 10000.", "Set Toss-Up Value", sText)
+            sText = InputBox("The Toss-Up value must be greater than 0.", "Set Toss-Up Value", sText)
         Loop
         If sText = "" Then
             Exit Sub
         End If
+    End If
+    If isTossUp = 3 Then
+        If puzzleExists(i + 1) = False Or puzzleExists(i + 2) = False Then
+            MsgBox "Cannot start a Triple Toss-Up from puzzle " & i & " because puzzle " & i + 1 & " and/or " & i + 2 & " cannot be found.", 0, "Triple Toss-Up Error"
+            Exit Sub
+        End If
+        sText = InputBox("How much is each puzzle in the Triple Toss-Up worth in dollars?", "Set Triple Toss-Up Value", "2000")
+        Do Until sText = ""
+            If IsNumeric(sText) = False Then
+                GoTo notValidTripleTossUpValue
+            ElseIf CLng(sText) < 1 Then
+                GoTo notValidTripleTossUpValue
+            Else:
+                Exit Do
+            End If
+notValidTripleTossUpValue:
+            sText = InputBox("The Triple Toss-Up value must be greater than 0.", "Set Toss-Up Value", sText)
+        Loop
+        If sText = "" Then
+            Exit Sub
+        End If
+    End If
+    If isTossUp = 4 Then
+        sText = CLng(ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text)
     End If
     ClearBoardButton
     Dim PuzzleNumberIndex As Integer, j As Integer, k As Integer
@@ -884,7 +924,7 @@ notValidTossUpValue:
         End If
     Next j
     ActivePresentation.Slides(2).Shapes("CategoryBox").TextFrame.TextRange.Text = ActivePresentation.Slides(12 + PuzzleNumberIndex).Shapes("PuzzleCategory" & i).TextFrame.TextRange.Text
-    If isTossUp = False Then
+    If isTossUp = 0 Then
         For k = 1 To 27
             If k < 27 Or (k = 27 And ActivePresentation.Slides(9).Shapes("SpanishN").TextFrame.TextRange.Text = "on") Then
                 ActivePresentation.Slides(2).Shapes("Letter" & k).Visible = True
@@ -892,7 +932,16 @@ notValidTossUpValue:
         Next k
         ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ""
         ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = ""
+        ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = ""
     Else:
+        If isTossUp = 3 Then
+            ActivePresentation.Slides(2).Shapes("TossUpBanner").GroupItems("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 1"
+            ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = "1"
+        ElseIf isTossUp = 4 Then
+            ActivePresentation.Slides(2).Shapes("TossUpBanner").GroupItems("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle " & ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text
+        Else:
+            ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = "0"
+        End If
         ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True
         ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = CLng(sText)
         setValuePanelDisplay
@@ -912,7 +961,7 @@ errHandler:
     Exit Sub
 End Sub
 
-Private Sub solvePuzzle()
+Private Sub solvePuzzle(resetValuePanel As Boolean)
     On Error GoTo errHandler
     Dim i As Integer, j As Integer
     For i = 1 To 52
@@ -924,14 +973,24 @@ Private Sub solvePuzzle()
     For j = 1 To 27
         ActivePresentation.Slides(2).Shapes("Letter" & j).Visible = False
     Next j
-        ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = False
+    ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = False
     ActivePresentation.Slides(2).Shapes("LeftTab").Fill.ForeColor.RGB = RGB(41, 183, 233)
     ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Puzzle"
     ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = False
-    ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(9).Shapes("GameName").TextFrame.TextRange.Text
+    If resetValuePanel Then
+        ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(9).Shapes("GameName").TextFrame.TextRange.Text
+    End If
     ActivePresentation.Slides(2).Shapes("NoMoreVowels").Visible = False
     ActivePresentation.Slides(2).Shapes("NoMoreConsonants").Visible = False
-    ActivePresentation.Slides(11).Shapes("SolvePuzzleChime").ActionSettings(ppMouseClick).SoundEffect.Play
+    If ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 1" Or ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 2" Then
+        ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Next"
+        ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = CStr(CInt(ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text) + 1)
+        ActivePresentation.Slides(11).Shapes("TripleTossUpSolve").ActionSettings(ppMouseClick).SoundEffect.Play
+    ElseIf ActivePresentation.Slides(2).Shapes("RSTLNE").Visible = True And ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = "" Then ' Don't play SFX if solving Bonus Round
+        Exit Sub
+    Else:
+        ActivePresentation.Slides(11).Shapes("SolvePuzzleChime").ActionSettings(ppMouseClick).SoundEffect.Play
+    End If
     Exit Sub
 errHandler:
     Exit Sub
@@ -1056,6 +1115,10 @@ Sub guessLetter(oSh As Shape)
                 If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency <> 0 Then
                     ActivePresentation.Slides(11).Shapes("GuessLetterWrong").ActionSettings(ppMouseClick).SoundEffect.Play
                 End If
+                If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency = 0 And ActivePresentation.Slides(2).Shapes("StartedSpecialMusic").TextFrame.TextRange.Text = "" Then
+                    ActivePresentation.Slides(2).Shapes("StartedSpecialMusic").TextFrame.TextRange.Text = "1"
+                    ActivePresentation.Slides(11).Shapes("FinalSpinMusic").ActionSettings(ppMouseClick).SoundEffect.Play
+                End If
                 Exit Sub
             End If
             If isVowel(theLetter) Then
@@ -1063,12 +1126,22 @@ Sub guessLetter(oSh As Shape)
                 If vowelsRemaining = False And consonantsRemaining = True And _
                 ActivePresentation.Slides(9).Shapes("NoMoreVowels").TextFrame.TextRange.Text = "on" Then
                     ActivePresentation.Slides(2).Shapes("NoMoreVowels").Visible = True
+                    Dim m As Integer, vowelNums
+                    vowelNums = Array(1, 5, 9, 15, 21)
+                    For m = LBound(vowelNums) To UBound(vowelNums)
+                        ActivePresentation.Slides(2).Shapes("Letter" + CStr(vowelNums(m))).TextFrame.TextRange.Text = ""
+                    Next m
                 End If
             Else:
                 ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = letterCount
                 If vowelsRemaining = True And consonantsRemaining = False And _
                 ActivePresentation.Slides(9).Shapes("NoMoreVowels").TextFrame.TextRange.Text = "on" Then
                     ActivePresentation.Slides(2).Shapes("NoMoreConsonants").Visible = True
+                    Dim n As Integer, consonantNums
+                    consonantNums = Array(2, 3, 4, 6, 7, 8, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 27)
+                    For n = LBound(consonantNums) To UBound(consonantNums)
+                        ActivePresentation.Slides(2).Shapes("Letter" + CStr(consonantNums(n))).TextFrame.TextRange.Text = ""
+                    Next n
                 End If
             End If
             ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = ""
@@ -1076,6 +1149,10 @@ Sub guessLetter(oSh As Shape)
             setValuePanelDisplay
             If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency <> 0 Then
                 ActivePresentation.Slides(11).Shapes("GuessLetterCorrect").ActionSettings(ppMouseClick).SoundEffect.Play
+            End If
+            If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency = 0 And ActivePresentation.Slides(2).Shapes("StartedSpecialMusic").TextFrame.TextRange.Text = "" Then
+                ActivePresentation.Slides(2).Shapes("StartedSpecialMusic").TextFrame.TextRange.Text = "1"
+                ActivePresentation.Slides(11).Shapes("FinalSpinMusic").ActionSettings(ppMouseClick).SoundEffect.Play
             End If
             Exit Sub
         End If
@@ -1086,7 +1163,7 @@ End Sub
 
 Sub revealLetter(oSh As Shape)
 On Error GoTo errHandler
-    If ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Puzzle" Then
+    If ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Puzzle" Or ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Next" Then
         LoadPuzzleOrSolve
     Else:
         Dim i As Integer, j As Boolean
@@ -1117,13 +1194,13 @@ On Error GoTo errHandler
                     Do Until sText = ""
                         If IsNumeric(sText) = False Then
                             GoTo notValidTossUpValue
-                        ElseIf CLng(sText) > 10000 Or CLng(sText) < 1 Then
+                        ElseIf CLng(sText) < 1 Then
                             GoTo notValidTossUpValue
                         Else:
                             Exit Do
                         End If
 notValidTossUpValue:
-                        sText = InputBox("The toss-up value must be a number between 1 and 10000.", "Set Toss-Up Value", sText)
+                        sText = InputBox("The toss-up value must be greater than 0.", "Set Toss-Up Value", sText)
                     Loop
                     If sText = "" Then
                         Exit Sub
@@ -1153,6 +1230,9 @@ notValidTossUpValue:
                 ' Reveal letter
                 ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text
                 If isFirstReveal Then
+                    If ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Toss-Up Puzzle" Then
+                        ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = "0"
+                    End If
                     ActivePresentation.Slides(11).Shapes("TossUpMusic").ActionSettings(ppMouseClick).SoundEffect.Play
                     Exit Sub
                 End If
@@ -1220,6 +1300,7 @@ Private Sub wipeOnClose(wipeAll As Boolean)
         ActivePresentation.Slides(j).Shapes("WheelValue").TextFrame.TextRange.Text = ""
     Next j
     ActivePresentation.Slides(2).Shapes("NextPuzzleToLoad").TextFrame.TextRange.Text = "1"
+    ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = ""
     ActivePresentation.SlideShowWindow.View.Exit
 End Sub
 
@@ -1271,14 +1352,6 @@ Sub toggleSpanishN()
     End If
 End Sub
 
-Sub toggle10000Wedge()
-    Dim i As Integer
-    For i = 3 To 5
-        ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 1
-        ActivePresentation.Slides(i).Shapes("RestoreWheelItems").Visible = True
-    Next i
-End Sub
-
 Sub toggleGiftTag()
     Dim i As Integer
     For i = 3 To 5
@@ -1292,9 +1365,6 @@ Sub restoreWheelItems()
     For i = 3 To 5
         If ActivePresentation.Slides(10).Shapes("WildCard").TextFrame.TextRange.Text = "on" Then
             ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("WildCard").Fill.Transparency = 0
-        End If
-        If ActivePresentation.Slides(10).Shapes("10000Wedge").TextFrame.TextRange.Text = "on" Then
-            ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 0
         End If
         If ActivePresentation.Slides(10).Shapes("GiftTag").TextFrame.TextRange.Text = "on" Then
             ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("GiftTag").Fill.Transparency = 0
@@ -1366,7 +1436,7 @@ Sub toggleBankrupts(oClickedShape As Shape)
     End If
 End Sub
 
-Sub toggle5Wedge(oClickedShape As Shape)
+Sub toggleNonStandardWedges(oClickedShape As Shape)
   Dim oSh As Shape, i As Integer, j As Integer
     Dim sText As String
     For Each oSh In SlideShowWindows(1).View.Slide.Shapes
@@ -1375,13 +1445,13 @@ Sub toggle5Wedge(oClickedShape As Shape)
         End If
     Next
     Call toggleOnOff(oSh)
-    If ActivePresentation.Slides(10).Shapes("5Wedge").TextFrame.TextRange.Text = "off" Then
+    If oSh.TextFrame.TextRange.Text = "off" Then
         For i = 3 To 6
-            ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems("Purple5").Fill.Transparency = 1
+            ActivePresentation.Slides(i).Shapes("TheWheel").GroupItems(oSh.Name).Fill.Transparency = 1
         Next i
     Else:
         For j = 3 To 6
-            ActivePresentation.Slides(j).Shapes("TheWheel").GroupItems("Purple5").Fill.Transparency = 0
+            ActivePresentation.Slides(j).Shapes("TheWheel").GroupItems(oSh.Name).Fill.Transparency = 0
         Next j
     End If
 End Sub
@@ -1999,6 +2069,7 @@ Sub toggleFinalSpin()
             ActivePresentation.Slides(2).Shapes("FInalSpinBanner").Visible = True
             ActivePresentation.Slides(2).Shapes("BlackCover").Visible = True
             ActivePresentation.Slides(2).Shapes("ManualFinalSpin").Visible = True
+            ActivePresentation.Slides(2).Shapes("StartedSpecialMusic").TextFrame.TextRange.Text = ""
             ActivePresentation.Slides(11).Shapes("FinalSpinAlert").ActionSettings(ppMouseClick).SoundEffect.Play
             Exit Sub
         Else:
@@ -2034,6 +2105,7 @@ Private Sub toggleBonusRound(i As Boolean)
     ActivePresentation.Slides(2).Shapes("BonusLetters").Visible = i
     ActivePresentation.Slides(2).Shapes("Bonus" & 10).Visible = i
     ActivePresentation.Slides(2).Shapes("BonusBox").TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(2).Shapes("StartedSpecialMusic").TextFrame.TextRange.Text = ""
 End Sub
 
 Sub bonusRoundBlock()
@@ -2116,8 +2188,8 @@ Sub manuallySetValuePanel()
     Loop
     If sText = "" Then
     Else:
-        If CLng(sText) > 10000 Or CLng(sText) < 1 Then
-            MsgBox "Wheel values must range from 1 to 10000.", 0, "Manually Set Value Panel"
+        If CLng(sText) < 1 Then
+            MsgBox "The wheel value must be greater than 0.", 0, "Manually Set Value Panel"
             Exit Sub
         Else:
             ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = CLng(sText)
@@ -2137,19 +2209,14 @@ Private Sub setValuePanelDisplay()
         Else:
             effectiveWheelValue = CLng(spunWheelValue.Text) + 1000
         End If
-        ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = "$" & CStr(effectiveWheelValue)
+        ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = "$" & CStr(FormatNumber(effectiveWheelValue, 0))
     Else:
         ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ""
         Exit Sub
     End If
     If letterCounter.Text <> "" And IsNumeric(letterCounter.Text) Then
-        If spunWheelValue.Text = "10000" Then
-            ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = "** " & ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text _
-        & " **"
-        Else:
-            ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text _
-        & " * " & letterCounter.Text & " = $" & CLng(effectiveWheelValue) * CLng(letterCounter.Text)
-        End If
+        ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text _
+        & " * " & letterCounter.Text & " = $" & FormatNumber(CLng(effectiveWheelValue) * CLng(letterCounter.Text), 0)
     End If
 End Sub
 
@@ -2430,7 +2497,7 @@ Sub ExplainBlueTiles()
 End Sub
 
 Sub ExplainNoMoreVowels()
-    MsgBox "Choose whether to inform players when there are no more vowels or no more consonants in the puzzle. The default is on.", 0, "No More Vowels Setting"
+    MsgBox "Choose whether to inform players when there are no more vowels or no more consonants in the puzzle. The default is on.", 0, "No More Vowels/Consonants Setting"
 End Sub
 
 Sub ExplainClaimable()
@@ -2456,7 +2523,7 @@ Sub ExplainGameName()
 End Sub
 
 Sub ExplainFreePlay()
-    MsgBox "Choose whether to use the Free Play wedge on the wheel. The default is off." & vbNewLine & vbNewLine & _
+    MsgBox "Choose whether to use the Free Play wedge on the wheel (retired in 2021 on the actual show). The default is off." & vbNewLine & vbNewLine & _
     "Landing on Free Play lets the player call a consonant at $500 or a vowel for free. The player then gets another turn regardless if the letter they called is in the puzzle.", 0, "Free Play Wedge Setting"
 End Sub
 
@@ -2469,9 +2536,9 @@ Sub ExplainWildCard()
     "The Wild Card, when used by the player, lets them call another consonant worth the value of their prior spin. The player can also use it during the Bonus Round to call an extra consonant.", 0, "Wild Card Setting"
 End Sub
 
-Sub Explain10000Wedge()
-    MsgBox "Choose whether to use the $10000 Wedge item on the wheel. The default is off." & vbNewLine & vbNewLine & _
-    "The $10000 in the wedge is a thin sliver flanked by two thin Bankrupts. If a player lands on $10000 and calls a letter in the puzzle, they earn exactly $10000, regardless of the amount of the letter in the puzzle.", 0, "$10000 Wedge Setting"
+Sub Explain5000Sliver()
+    MsgBox "Choose whether to use the $5,000 Sliver on the wheel (does not exist in the actual show). The default is off." & vbNewLine & vbNewLine & _
+    "The wedge is split into thirds: two Bankrupts on the side and $5,000 in the middle (similar to the actual show's Million Dollar Wedge).", 0, "$5,000 Sliver Setting"
 End Sub
 
 Sub ExplainGiftTag()
@@ -2480,8 +2547,20 @@ Sub ExplainGiftTag()
 End Sub
 
 Sub Explain5Wedge()
-    MsgBox "Optionally place a $5 wedge on the wheel. A joke that's unfortunate and fortunate for the player (at least it's not a Bankrupt)." & vbNewLine & vbNewLine & _
-    "The default is off.", 0, "$5 Wedge Setting"
+    MsgBox "Optionally place a $5 wedge on the wheel (does not exist in the actual show). The default is off.", 0, "$5 Wedge Setting"
+End Sub
+
+Sub ExplainPuzzleBoardTrim()
+    MsgBox "Choose the color of the puzzle board trim and wheel.", 0, "Puzzle Board Trim Setting"
+End Sub
+
+Sub ExplainGamesByTimAttribution()
+    MsgBox "Choose whether to display gamesbytim.com on the puzzle board.", 0, "Games by Tim Attribution Setting"
+End Sub
+
+Sub ExplainTripleTossUpScoreBonus()
+    MsgBox "As of 2021 in the actual show, solving all three Triple Toss-Ups augments that player's Triple Toss-Up winnings to 5x the Triple Toss-Up value (ex: $10,000 if each Toss-Up is worth $2,000)." & _
+    " Enable this setting to opt in the rule change. The default is off.", 0, "Triple Toss-Up Score Bonus Setting"
 End Sub
 
 Sub doFinalSpin()
@@ -2535,3 +2614,65 @@ Sub revealTossUpLetter()
 errHandler:
     Exit Sub
 End Sub
+
+Sub PuzzleBoardTrimChange()
+    Dim i As Integer
+    Dim themeNumber
+    Set themeNumber = ActivePresentation.Slides(9).Shapes("PuzzleBoardTrim").TextFrame.TextRange
+    Dim wheelTrimGradientInner As Long, wheelTrimGradientOuter As Long
+    If themeNumber.Text = "blue" Then
+        ActivePresentation.Slides(2).Shapes("BoardChrome").Visible = False
+        ActivePresentation.Slides(2).Shapes("BoardChrome2").Visible = True
+        wheelTrimGradientInner = RGB(224, 211, 164)
+        wheelTrimGradientOuter = RGB(56, 48, 20)
+        themeNumber.Text = "gold"
+    Else:
+        ActivePresentation.Slides(2).Shapes("BoardChrome2").Visible = False
+        ActivePresentation.Slides(2).Shapes("BoardChrome").Visible = True
+        wheelTrimGradientInner = RGB(182, 209, 248)
+        wheelTrimGradientOuter = RGB(27, 11, 123)
+        themeNumber.Text = "blue"
+    End If
+    For i = 3 To 6
+        With ActivePresentation.Slides(i)
+            With .Shapes("WheelTrim")
+                .Fill.GradientStops.Insert wheelTrimGradientInner, 0.66
+                .Fill.GradientStops.Insert wheelTrimGradientOuter, 0.73
+                .Fill.GradientStops.Delete (1)
+                .Fill.GradientStops.Delete (1)
+            End With
+        End With
+    Next i
+End Sub
+
+Sub toggleGamesByTimAttribution(oClickedShape As Shape)
+  Dim oSh As Shape
+    For Each oSh In SlideShowWindows(1).View.Slide.Shapes
+        If oSh.Name = oClickedShape.Name Then
+            Exit For
+        End If
+    Next
+    Call toggleOnOff(oSh)
+    If oSh.TextFrame.TextRange.Text = "off" Then
+        ActivePresentation.Slides(2).Shapes("GamesByTimButton").Visible = False
+        ActivePresentation.Slides(2).Shapes("TopRightBG").Left = 512.3834
+        ActivePresentation.Slides(2).Shapes("TopRightBG").Width = 195.1448
+    Else:
+        ActivePresentation.Slides(2).Shapes("GamesByTimButton").Visible = True
+        ActivePresentation.Slides(2).Shapes("TopRightBG").Left = 433.979
+        ActivePresentation.Slides(2).Shapes("TopRightBG").Width = 273.5493
+    End If
+End Sub
+
+Sub startBonusCountdownMusic()
+    On Error GoTo errHandler
+    If ActivePresentation.Slides(2).Shapes("StartedSpecialMusic").TextFrame.TextRange.Text = "" Then
+        ActivePresentation.Slides(2).Shapes("StartedSpecialMusic").TextFrame.TextRange.Text = "1"
+        ActivePresentation.Slides(11).Shapes("BonusCountdown").ActionSettings(ppMouseClick).SoundEffect.Play
+    Else:
+        ActivePresentation.Slides(2).Shapes("StartedSpecialMusic").TextFrame.TextRange.Text = ""
+    End If
+errHandler:
+    Exit Sub
+End Sub
+

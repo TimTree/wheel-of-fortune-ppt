@@ -66,32 +66,26 @@ Sub youLandedOn(degrees As Integer, wheelType As Integer)
         End If
     Case 2100 To 2249
         ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$600"
-    ' Begin $10,000 wedge
+    ' Begin $5,000 Sliver
     Case 2250 To 2299
-        If wheelType = 6 Then ' Fourth Round
-            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$500"
-        ElseIf ActivePresentation.SlideShowWindow.View.Slide.Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 1 Then
+        If ActivePresentation.SlideShowWindow.View.Slide.Shapes("TheWheel").GroupItems("5000Sliver").Fill.Transparency = 1 Then
             ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$500"
         Else:
             ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "Bankrupt"
         End If
     Case 2300 To 2349
-        If wheelType = 6 Then ' Fourth Round
-            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$500"
-        ElseIf ActivePresentation.SlideShowWindow.View.Slide.Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 1 Then
+        If ActivePresentation.SlideShowWindow.View.Slide.Shapes("TheWheel").GroupItems("5000Sliver").Fill.Transparency = 1 Then
             ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$500"
         Else:
-            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$10,000"
+            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$" & FormatNumber(5000, 0)
         End If
     Case 2350 To 2399
-        If wheelType = 6 Then ' Fourth Round
-            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$500"
-        ElseIf ActivePresentation.SlideShowWindow.View.Slide.Shapes("TheWheel").GroupItems("10000Wedge").Fill.Transparency = 1 Then
+        If ActivePresentation.SlideShowWindow.View.Slide.Shapes("TheWheel").GroupItems("5000Sliver").Fill.Transparency = 1 Then
             ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$500"
         Else:
             ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "Bankrupt"
         End If
-    ' End $10,000 wedge
+    ' End $5,000 Sliver
     Case 2400 To 2549
         If ActivePresentation.Slides(10).Shapes("WheelValues").TextFrame.TextRange.Text = "$500-$900" Then
             ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$700"
@@ -140,11 +134,12 @@ Sub youLandedOn(degrees As Integer, wheelType As Integer)
         ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$500"
     Case Else
         If wheelType = 3 Then ' First Round
-            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$2500"
+            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$" & FormatNumber(2500, 0)
         ElseIf wheelType = 4 Or wheelType = 5 Then ' Mystery/Express Round
-            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$3500"
+            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$" & FormatNumber(3500, 0)
         Else: ' Fourth Round
-            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$5000"
+            ActivePresentation.SlideShowWindow.View.Slide.Shapes("WheelValue").TextFrame.TextRange = "$" & FormatNumber(5000, 0)
         End If
     End Select
 End Sub
+
