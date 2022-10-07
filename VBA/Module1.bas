@@ -2883,7 +2883,7 @@ Sub changeRounds(oClickedShape As Shape)
 End Sub
 
 Sub randomCategory()
-    Dim categories As Variant, randomNumber As Integer, categories2 As Variant
+    Dim categories As Variant, randomNumber As Integer
     categories = Array("AROUND THE HOUSE", "BEFORE & AFTER", "CHARACTER", "CLASSIC TV", "COLLEGE LIFE", "EVENT", "FUN & GAMES", _
     "FOOD & DRINK", "HEADLINE", "HUSBAND & WIFE", "IN THE KITCHEN", "LANDMARK", "LIVING THING", "LIVING THINGS", "MOVIE QUOTE", "TV QUOTE", "OCCUPATION", "ON THE MAP", _
     "PERSON", "PEOPLE", "PHRASE", "PLACE", "PLACES", "PROPER NAME", "QUOTATION", "RHYME TIME", "SAME LETTER", "SAME NAME", "SHOW BIZ", "SONG/ARTIST", "SONG LYRICS", _
