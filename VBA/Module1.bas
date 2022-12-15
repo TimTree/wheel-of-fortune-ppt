@@ -953,7 +953,45 @@ End Sub
 
 Private Sub solvePuzzle(resetValuePanel As Boolean)
     On Error GoTo errHandler
-    Dim i As Integer, j As Integer
+' Assemble the right answer.
+    Dim answer As String, char As String, i As Integer, j As Integer
+    answer = ""
+    For i = 1 To 52
+        char = ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text
+' Add space if tile is blank and answer doesn't already end with space.
+        If char = "" Then
+            If Right$(answer, 1) <> " " Then
+                answer = answer + " "
+            End If
+' Add character in tile if not blank.
+        Else
+            answer = answer + char
+        End If
+' Add space if last tile in row is character.
+        If Right$(answer, 1) = " " And (i = 12 Or i = 26 Or i = 40 Or i = 52) Then
+            answer = RTrim(answer) + " "
+        End If
+    Next i
+    answer = Trim(answer)
+' Ask the user for input.
+    Dim userAnswer As String, gaveUp As Boolean
+    userAnswer = InputBox( _
+        "Type the player's answer to check it. Double-check for typos!" & vbNewLine & _
+        "To cancel out of this menu, press ""Cancel"" or leave the solution blank." & vbNewLine & _
+        "To give up, type ""/giveup"", and to reveal without typing the answer, type ""/reveal"".", _
+        "Check solution to puzzle", "/reveal")
+    userAnswer = Trim(userAnswer)
+' Compare case insensitive (so-called "textual comparison")
+    If 0 = StrComp(userAnswer, "/giveup", vbTextCompare) Then
+        gaveUp = True
+    ElseIf "" = userAnswer Then
+        Exit Sub
+    ElseIf "/reveal" <> userAnswer and 0 <> StrComp(answer, userAnswer, 1) Then
+        ' wrong answer. exit out
+        ActivePresentation.Slides(11).Shapes("GuessLetterWrong").ActionSettings(ppMouseClick).SoundEffect.Play
+        Exit Sub
+    End If
+' End answer checking code.
     For i = 1 To 52
         ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text
         If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(0, 0, 255) Then
@@ -983,12 +1021,16 @@ Private Sub solvePuzzle(resetValuePanel As Boolean)
     ElseIf ActivePresentation.Slides(2).Shapes("RSTLNE").Visible = True And ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = "" Then ' Don't play SFX if solving Bonus Round
         Exit Sub
     Else:
-        ActivePresentation.Slides(11).Shapes("SolvePuzzleChime").ActionSettings(ppMouseClick).SoundEffect.Play
+' Do not play sound effect if user gave up
+        If gaveUp = False Then
+            ActivePresentation.Slides(11).Shapes("SolvePuzzleChime").ActionSettings(ppMouseClick).SoundEffect.Play
+        End If
     End If
     Exit Sub
 errHandler:
     Exit Sub
 End Sub
+
 
 Private Function isLetter(strValue As String) As Boolean
     Dim i As Integer
