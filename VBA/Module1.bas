@@ -175,14 +175,12 @@ Sub ClearBoardButton()
     ActivePresentation.Slides(2).Shapes("LeftTab").Fill.ForeColor.RGB = RGB(41, 183, 233)
     ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Puzzle"
     ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
+    ActivePresentation.Slides(2).Shapes("ScoreAugment").TextFrame.TextRange.Text = ""
     ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = ""
-    ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Fill.Transparency = 1
-    ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Line.Transparency = 1
-    ActivePresentation.Slides(2).Shapes("RedCrossOut").Line.Transparency = 1
-    ActivePresentation.Slides(2).Shapes("LastLetterGuessed").TextFrame.TextRange.Text = ""
     ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = False
     ActivePresentation.Slides(2).Shapes("NoMoreVowels").Visible = False
     ActivePresentation.Slides(2).Shapes("NoMoreConsonants").Visible = False
+    ActivePresentation.Slides(2).Shapes("FirstPuzzleTileWithLetter").TextFrame.TextRange.Text = ""
     ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(9).Shapes("GameName").TextFrame.TextRange.Text
     resetBonusRound
     disableFinalSpin
@@ -224,13 +222,19 @@ Sub PlayerRoundDollarSign(oClickedShape As Shape)
         End If
     Next i
     If j = True Then
-        sText = InputBox("Manually edit " & ActivePresentation.Slides(2).Shapes("Player" & i & "Name").TextFrame.TextRange.Text & "'s round score:", "Manually Edit Round Score", CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text))
-        Do While IsNumeric(sText) = False And sText <> ""
+        sText = InputBox("Add or subtract the amount entered from " & ActivePresentation.Slides(2).Shapes("Player" & i & "Name").TextFrame.TextRange.Text & "'s round score." & vbNewLine & vbNewLine & _
+        "To set the exact score, append = to the amount.", "Manually Edit Round Score", "=" & CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text))
+        Do While IsNumeric(Replace(sText, "=", "")) = False And sText <> ""
             sText = InputBox("You can only enter numbers here. Try again:", "Manually Edit Round Score", sText)
         Loop
         If sText = "" Then
+            Exit Sub
         Else:
-            ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = FormatNumber(CLng(sText), 0)
+            If InStr(sText, "=") > 0 Then
+                ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = FormatNumber(CLng(Replace(sText, "=", "")), 0)
+            Else:
+                ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = FormatNumber(CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + CLng(sText), 0)
+            End If
         End If
     End If
 End Sub
@@ -250,13 +254,19 @@ Sub PlayerTotalsDollarSign(oClickedShape As Shape)
         End If
     Next i
     If j = True Then
-        sText = InputBox("Manually edit " & ActivePresentation.Slides(2).Shapes("Player" & i & "Name").TextFrame.TextRange.Text & "'s totals score:", "Manually Edit Totals Score", CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore").TextFrame.TextRange.Text))
-        Do While IsNumeric(sText) = False And sText <> ""
+        sText = InputBox("Add or subtract the amount entered from " & ActivePresentation.Slides(2).Shapes("Player" & i & "Name").TextFrame.TextRange.Text & "'s totals score." & vbNewLine & vbNewLine & _
+        "To set the exact score, append = to the amount.", "Manually Edit Totals Score", "=" & CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore").TextFrame.TextRange.Text))
+        Do While IsNumeric(Replace(sText, "=", "")) = False And sText <> ""
             sText = InputBox("You can only enter numbers here. Try again:", "Manually Edit Totals Score", sText)
         Loop
         If sText = "" Then
+            Exit Sub
         Else:
-            ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore").TextFrame.TextRange.Text = FormatNumber(CLng(sText), 0)
+            If InStr(sText, "=") > 0 Then
+                ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore").TextFrame.TextRange.Text = FormatNumber(CLng(Replace(sText, "=", "")), 0)
+            Else:
+                ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore").TextFrame.TextRange.Text = FormatNumber(CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "TotalsScore").TextFrame.TextRange.Text) + CLng(sText), 0)
+            End If
         End If
     End If
 End Sub
@@ -287,6 +297,23 @@ Sub PlayerAddFromValuePanel(oClickedShape As Shape)
                 , 0, "Add to " & ActivePresentation.Slides(2).Shapes("Player" & i & "Name").TextFrame.TextRange.Text & "'s Round Score"
                 Exit Sub
             Else:
+                If ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True And (ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Toss-Up Puzzle" Or ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 3") Then
+                    If ActivePresentation.Slides(9).Shapes("SolveButton").TextFrame.TextRange.Text = "verify" Then
+                        If verifyPuzzle(True) = False Then
+                            Exit Sub
+                        End If
+                    Else:
+                        solvePuzzle (True)
+                    End If
+                ElseIf ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True And (ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 1" Or ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 2") Then
+                    If ActivePresentation.Slides(9).Shapes("SolveButton").TextFrame.TextRange.Text = "verify" Then
+                        If verifyPuzzle(False) = False Then
+                            Exit Sub
+                        End If
+                    Else:
+                        solvePuzzle (False)
+                    End If
+                End If
                 Dim effectiveWheelValue As Long
                 If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Fill.ForeColor.RGB = RGB(225, 129, 75) Then
                     effectiveWheelValue = CLng(ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text) + 1000
@@ -295,7 +322,7 @@ Sub PlayerAddFromValuePanel(oClickedShape As Shape)
                 End If
                 If InStr(ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text, "Triple") > 0 And _
                 CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) / 2 = CLng(ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text) And _
-                ActivePresentation.Slides(9).Shapes("TripleTossUpBonus").TextFrame.TextRange.Text = "on" Then
+                ActivePresentation.Slides(9).Shapes("SpecialScoreBonuses").TextFrame.TextRange.Text = "on" Then
                     ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
                     FormatNumber(CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
                     effectiveWheelValue * 3, 0)
@@ -303,18 +330,16 @@ Sub PlayerAddFromValuePanel(oClickedShape As Shape)
                     ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
                     FormatNumber(CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
                     effectiveWheelValue, 0)
+                ElseIf ActivePresentation.Slides(2).Shapes("ScoreAugment").TextFrame.TextRange.Text <> "" Then
+                    ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
+                    FormatNumber(CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
+                    CLng(ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text) * _
+                    effectiveWheelValue + CLng(ActivePresentation.Slides(2).Shapes("ScoreAugment").TextFrame.TextRange.Text), 0)
                 Else:
                     ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text = _
                     FormatNumber(CLng(ActivePresentation.Slides(2).Shapes("Player" & i & "RoundScore").TextFrame.TextRange.Text) + _
                     CLng(ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text) * _
                     effectiveWheelValue, 0)
-                End If
-                If ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True And (ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Toss-Up Puzzle" Or ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 3") Then
-                    solvePuzzle (True)
-                    Exit Sub
-                ElseIf ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True And (ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 1" Or ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Triple Toss-Up Puzzle 2") Then
-                    solvePuzzle (False)
-                    Exit Sub
                 End If
                 If ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Puzzle" Then
                     ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
@@ -442,7 +467,7 @@ Sub DetermineMystery()
     Randomize
     randomNumber = Int(2 * Rnd) + 1
     If randomNumber = 2 Then
-        ActivePresentation.Slides(4).Shapes("MysteryIndicator").TextFrame.TextRange.Text = "$10,000"
+        ActivePresentation.Slides(4).Shapes("MysteryIndicator").TextFrame.TextRange.Text = "$" & CStr(FormatNumber(10000, 0))
         ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = "10000"
         ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
         setValuePanelDisplay
@@ -827,10 +852,21 @@ Sub LoadPuzzleOrSolve()
         Call loadPuzzle(CInt(ActivePresentation.Slides(2).Shapes("NextPuzzleToLoad").TextFrame.TextRange.Text), 4)
     Else:
         If ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True Then
-            solvePuzzle (False)
+            If ActivePresentation.Slides(9).Shapes("SolveButton").TextFrame.TextRange.Text = "verify" Then
+                verifyPuzzle (False)
+                Exit Sub
+            Else:
+                solvePuzzle (False)
+                Exit Sub
+            End If
         Else:
-            solvePuzzle (True)
-            Exit Sub
+            If ActivePresentation.Slides(9).Shapes("SolveButton").TextFrame.TextRange.Text = "verify" Then
+                verifyPuzzle (True)
+                Exit Sub
+            Else:
+                solvePuzzle (True)
+                Exit Sub
+            End If
         End If
     End If
 End Sub
@@ -895,6 +931,7 @@ notValidTripleTossUpValue:
                 ActivePresentation.Slides(2).Shapes("PuzzleCache" & m).TextFrame.TextRange.Text = Mid(theExamplePuzzle, m, 1)
             End If
         Next m
+        ActivePresentation.Slides(2).Shapes("FirstPuzzleTileWithLetter").TextFrame.TextRange.Text = 16
         ActivePresentation.Slides(2).Shapes("CategoryBox").TextFrame.TextRange.Text = "FUN & GAMES"
     Else:
         PuzzleNumberIndex = Int((i - 1) / 12)
@@ -904,6 +941,8 @@ notValidTripleTossUpValue:
                 ActivePresentation.Slides(2).Shapes("PuzzleCache" & j).TextFrame.TextRange.Text = ActivePresentation.Slides(12 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text
                 If isLetter(ActivePresentation.Slides(12 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text) = False Then
                     ActivePresentation.Slides(2).Shapes("PuzzleBoard" & j).TextFrame.TextRange.Text = ActivePresentation.Slides(12 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text
+                ElseIf ActivePresentation.Slides(2).Shapes("FirstPuzzleTileWithLetter").TextFrame.TextRange.Text = "" Then
+                    ActivePresentation.Slides(2).Shapes("FirstPuzzleTileWithLetter").TextFrame.TextRange.Text = j
                 End If
                 If ActivePresentation.Slides(12 + PuzzleNumberIndex).Shapes("PuzzleSolution" & i & "-" & j).TextFrame.TextRange.Text = ActivePresentation.Slides(9).Shapes("SpanN").TextFrame.TextRange.Text And _
                 ActivePresentation.Slides(9).Shapes("SpanishN").TextFrame.TextRange.Text = "off" Then
@@ -966,10 +1005,6 @@ Private Sub solvePuzzle(resetValuePanel As Boolean)
     ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = False
     ActivePresentation.Slides(2).Shapes("LeftTab").Fill.ForeColor.RGB = RGB(41, 183, 233)
     ActivePresentation.Slides(2).Shapes("LeftTab").TextFrame.TextRange.Text = "Load Puzzle"
-    ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Fill.Transparency = 1
-    ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Line.Transparency = 1
-    ActivePresentation.Slides(2).Shapes("RedCrossOut").Line.Transparency = 1
-    ActivePresentation.Slides(2).Shapes("LastLetterGuessed").TextFrame.TextRange.Text = ""
     ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = False
     If resetValuePanel Then
         ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(9).Shapes("GameName").TextFrame.TextRange.Text
@@ -1063,7 +1098,7 @@ Sub guessLetter(oSh As Shape)
     Next i
     If j = True Then
         If ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text <> "" Then
-            Dim theLetter As String, letterCount As Integer, vowelsRemaining As Boolean, consonantsRemaining As Boolean
+            Dim theLetter As String, letterCount As Integer, vowelsRemaining As Boolean, consonantsRemaining As Boolean, gotSameLetter As Boolean
             letterCount = 0
             vowelsRemaining = False
             consonantsRemaining = False
@@ -1075,15 +1110,10 @@ Sub guessLetter(oSh As Shape)
                     Exit Sub
                 Else:
                     ActivePresentation.Slides(2).Shapes("BonusLetters").TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("BonusLetters").TextFrame.TextRange.Text + theLetter
-                    ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
-                    ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = ""
                     ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = ""
                     Exit Sub
                 End If
             End If
-            ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Fill.Transparency = 0
-            ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Line.Transparency = 0
-            ActivePresentation.Slides(2).Shapes("LastLetterGuessed").TextFrame.TextRange.Text = theLetter
             For k = 1 To 52
                 If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(255, 255, 255) And ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = "" Then
                     If lettersMatch(ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text, theLetter) Then
@@ -1091,6 +1121,12 @@ Sub guessLetter(oSh As Shape)
                             ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text
                         Else:
                             ActivePresentation.Slides(2).Shapes("PuzzleBoard" & k).Fill.ForeColor.RGB = RGB(0, 0, 255)
+                        End If
+                        If k = CLng(ActivePresentation.Slides(2).Shapes("FirstPuzzleTileWithLetter").TextFrame.TextRange.Text) Then
+                            If Trim(UCase(ActivePresentation.Slides(2).Shapes("CategoryBox").TextFrame.TextRange.Text)) = "SAME LETTER" And _
+                            ActivePresentation.Slides(9).Shapes("SpecialScoreBonuses").TextFrame.TextRange.Text = "on" Then
+                                gotSameLetter = True
+                            End If
                         End If
                         letterCount = letterCount + 1
                     ElseIf isVowel(ActivePresentation.Slides(2).Shapes("PuzzleCache" & k).TextFrame.TextRange.Text) Then
@@ -1104,7 +1140,6 @@ Sub guessLetter(oSh As Shape)
                 If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency <> 0 Then
                     ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = ""
                 End If
-                ActivePresentation.Slides(2).Shapes("RedCrossOut").Line.Transparency = 0
                 ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = True
                 ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
                 ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = ""
@@ -1127,6 +1162,11 @@ Sub guessLetter(oSh As Shape)
                 End If
             Else:
                 ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = letterCount
+                If gotSameLetter = True Then
+                    ActivePresentation.Slides(2).Shapes("ScoreAugment").TextFrame.TextRange.Text = 1000
+                Else:
+                    ActivePresentation.Slides(2).Shapes("ScoreAugment").TextFrame.TextRange.Text = ""
+                End If
                 If vowelsRemaining = True And consonantsRemaining = False And _
                 ActivePresentation.Slides(9).Shapes("NoMoreVowels").TextFrame.TextRange.Text = "on" Then
                     ActivePresentation.Slides(2).Shapes("NoMoreConsonants").Visible = True
@@ -1138,7 +1178,6 @@ Sub guessLetter(oSh As Shape)
                 End If
             End If
             ActivePresentation.Slides(2).Shapes("Letter" & i).TextFrame.TextRange.Text = ""
-            ActivePresentation.Slides(2).Shapes("RedCrossOut").Line.Transparency = 1
             ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = False
             setValuePanelDisplay
             If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency <> 0 Then
@@ -1167,10 +1206,6 @@ On Error GoTo errHandler
             If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(0, 0, 255) Then
                 ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text
                 ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB = RGB(255, 255, 255)
-                ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Fill.Transparency = 1
-                ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Line.Transparency = 1
-                ActivePresentation.Slides(2).Shapes("RedCrossOut").Line.Transparency = 1
-                ActivePresentation.Slides(2).Shapes("LastLetterGuessed").TextFrame.TextRange.Text = ""
                 Exit Sub
             ElseIf ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).Fill.ForeColor.RGB <> RGB(24, 154, 80) Then
                 ' If a letter was already selected in letter selector, do nothing
@@ -1211,18 +1246,25 @@ notValidTossUpValue:
                         ActivePresentation.Slides(2).Shapes("TossUpBanner").Visible = True
                     Next m
                 End If
-                Dim n As Integer, isFirstReveal As Boolean
+                Dim n As Integer, isFirstReveal As Boolean, lettersLeft As Integer
                 isFirstReveal = True
+                lettersLeft = 0
                 For n = 1 To 52
                     If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & n).Fill.ForeColor.RGB = RGB(255, 255, 255) Then
                         If isLetter(ActivePresentation.Slides(2).Shapes("PuzzleBoard" & n).TextFrame.TextRange.Text) Then
                             isFirstReveal = False
+                        ElseIf ActivePresentation.Slides(2).Shapes("PuzzleBoard" & n).TextFrame.TextRange.Text = "" Then
+                            lettersLeft = lettersLeft + 1
                         End If
                     End If
                 Next n
                 ' Reveal letter
                 ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text
-                If isFirstReveal Then
+                If lettersLeft <= 1 Then ' If this is the last letter revealed in a toss-up
+                    solvePuzzle (False)
+                    ActivePresentation.Slides(11).Shapes("GuessLetterWrong").ActionSettings(ppMouseClick).SoundEffect.Play
+                    Exit Sub
+                ElseIf isFirstReveal Then
                     If ActivePresentation.Slides(2).Shapes("TossUpTitle").TextFrame.TextRange.Text = "Toss-Up Puzzle" Then
                         ActivePresentation.Slides(2).Shapes("TripleTossUpNumber").TextFrame.TextRange.Text = "0"
                     End If
@@ -1253,12 +1295,12 @@ Sub EditSetUpPuzzle(oClickedShape As Shape)
         End If
     Next
     sText = InputBox("Type the letter for this puzzle board tile:", "Set Up Puzzle", oSh.TextFrame.TextRange.Text)
-    Do While Len(sText) > 1
+    Do While Len(Trim(sText)) > 1
         sText = InputBox("Only one letter per tile. Try again." & vbNewLine & vbNewLine & _
         "Protip: Use Puzzle Scribe (the pencil button) to type an entire puzzle at once.", "Set Up Puzzle", sText)
     Loop
-    If Len(sText) = 1 And Not sText = " " Then
-        oSh.TextFrame.TextRange.Text = UCase(sText)
+    If Len(Trim(sText)) = 1 And Not sText = " " Then
+        oSh.TextFrame.TextRange.Text = Trim(UCase(sText))
         oSh.Fill.ForeColor.RGB = RGB(255, 255, 255)
     Else:
         oSh.TextFrame.TextRange.Text = ""
@@ -1275,7 +1317,7 @@ Sub EditSetUpCategory(oClickedShape As Shape)
         End If
     Next
     sText = InputBox("Type the category:", "Set Up Category", oSh.TextFrame.TextRange.Text)
-    oSh.TextFrame.TextRange.Text = UCase(sText)
+    oSh.TextFrame.TextRange.Text = Trim(UCase(sText))
 End Sub
 
 Private Function wait(PauseTime As Double)
@@ -1516,7 +1558,6 @@ Sub toggleWheelItems(oClickedShape As Shape)
 End Sub
 
 Sub toggleClaimable()
-    Dim i As Integer, j As Integer, k As Integer, m As Integer
     If ActivePresentation.Slides(10).Shapes("WheelItems").TextFrame.TextRange.Text = "once" Then
         ActivePresentation.Slides(10).Shapes("WheelItems").TextFrame.TextRange.Text = "multiple"
     Else:
@@ -1767,7 +1808,7 @@ Sub puzzleScribe()
                 If existingPuzzle = "" Then
                     existingPuzzle = existingPuzzle + SlideShowWindows(1).View.Slide.Shapes("SetUpPuzzle" & CStr(t)).TextFrame.TextRange.Text
                 Else:
-                    existingPuzzle = existingPuzzle + " | " + SlideShowWindows(1).View.Slide.Shapes("SetUpPuzzle" & CStr(t)).TextFrame.TextRange.Text
+                    existingPuzzle = existingPuzzle + " \ " + SlideShowWindows(1).View.Slide.Shapes("SetUpPuzzle" & CStr(t)).TextFrame.TextRange.Text
                 End If
             End If
         End If
@@ -1776,10 +1817,10 @@ Sub puzzleScribe()
             puzzleInRow = False
         End If
     Next t
-    sText = InputBox("Type your puzzle here, and it'll automatically write onto the tiles. Separate rows with |." & vbNewLine & vbNewLine & _
-    "Example" & vbNewLine & "puzzle scribe | saves me time", "Puzzle Scribe", LCase(existingPuzzle))
+    sText = InputBox("Type your puzzle here, and it'll automatically write onto the tiles. Separate rows with \." & vbNewLine & vbNewLine & _
+    "Example" & vbNewLine & "puzzle scribe \ saves me time", "Puzzle Scribe", LCase(existingPuzzle))
     Do Until sText = ""
-        puzzleSplitted = Split(sText, "|")
+        puzzleSplitted = Split(Replace(sText, "|", "\"), "\") ' | was the delimiter from v6.0-v6.3
         If UBound(puzzleSplitted) + 1 <= 2 Then
             puzzleRowLengths(0) = -1
             For i = LBound(puzzleSplitted) To UBound(puzzleSplitted)
@@ -1840,12 +1881,12 @@ Sub puzzleScribe()
 notValidPuzzle:
         If erroredRow < 5 Then
             sText = InputBox("Row " & erroredRow & " is too long for the puzzle board. Try again." & vbNewLine & vbNewLine & _
-            "Type your puzzle here, and it'll automatically write onto the tiles. Separate rows with |." & vbNewLine & vbNewLine & _
-            "Example" & vbNewLine & "puzzle scribe | saves me time", "Puzzle Scribe", sText)
+            "Type your puzzle here, and it'll automatically write onto the tiles. Separate rows with \." & vbNewLine & vbNewLine & _
+            "Example" & vbNewLine & "puzzle scribe \ saves me time", "Puzzle Scribe", sText)
         Else:
             sText = InputBox("This puzzle has more than the allowed four rows. Try again." & vbNewLine & vbNewLine & _
-            "Type your puzzle here, and it'll automatically write onto the tiles. Separate rows with |." & vbNewLine & vbNewLine & _
-            "Example" & vbNewLine & "puzzle scribe | saves me time", "Puzzle Scribe", sText)
+            "Type your puzzle here, and it'll automatically write onto the tiles. Separate rows with \." & vbNewLine & vbNewLine & _
+            "Example" & vbNewLine & "puzzle scribe \ saves me time", "Puzzle Scribe", sText)
         End If
     Loop
     If sText = "" Then
@@ -2006,11 +2047,10 @@ Sub RSTLNE()
         ActivePresentation.Slides(2).Shapes("RSTLNEBox").Fill.ForeColor.RGB = RGB(166, 166, 166)
         ActivePresentation.Slides(2).Shapes("RSTLNEOutline").Line.Transparency = 1
         ActivePresentation.Slides(2).Shapes("BonusOutline").Line.Transparency = 0
-        ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Fill.Transparency = 1
-        ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Line.Transparency = 1
-        ActivePresentation.Slides(2).Shapes("RedCrossOut").Line.Transparency = 1
-        ActivePresentation.Slides(2).Shapes("LastLetterGuessed").TextFrame.TextRange.Text = ""
         ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = False
+        ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
+        ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = ""
+        setValuePanelDisplay
     End If
 End Sub
 
@@ -2165,10 +2205,6 @@ Sub randomSpin()
     Dim x As Integer, rand As Integer, realRand As Double, effNew As Effect, effNew2 As Effect, effNew3 As Effect, effNew4 As Effect
     ' Clear letter counter
     ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange.Text = ""
-    ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Fill.Transparency = 1
-    ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Line.Transparency = 1
-    ActivePresentation.Slides(2).Shapes("RedCrossOut").Line.Transparency = 1
-    ActivePresentation.Slides(2).Shapes("LastLetterGuessed").TextFrame.TextRange.Text = ""
     ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = False
 Spin:
     ' Remove wheel animations
@@ -2245,10 +2281,6 @@ Sub manuallySetValuePanel()
             Exit Sub
         Else:
             ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange.Text = CLng(sText)
-            ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Fill.Transparency = 1
-            ActivePresentation.Slides(2).Shapes("LastLetterGuessed").Line.Transparency = 1
-            ActivePresentation.Slides(2).Shapes("RedCrossOut").Line.Transparency = 1
-            ActivePresentation.Slides(2).Shapes("LastLetterGuessed").TextFrame.TextRange.Text = ""
             ActivePresentation.Slides(2).Shapes("LetterSelectionOverlay2").Visible = False
             setValuePanelDisplay
         End If
@@ -2256,9 +2288,10 @@ Sub manuallySetValuePanel()
 End Sub
 
 Private Sub setValuePanelDisplay()
-    Dim spunWheelValue, letterCounter, effectiveWheelValue As Long
+    Dim spunWheelValue, letterCounter, scoreAugment, effectiveWheelValue As Long
     Set spunWheelValue = ActivePresentation.Slides(2).Shapes("SpunWheelValue").TextFrame.TextRange
     Set letterCounter = ActivePresentation.Slides(2).Shapes("LetterCounter").TextFrame.TextRange
+    Set scoreAugment = ActivePresentation.Slides(2).Shapes("ScoreAugment").TextFrame.TextRange
     If spunWheelValue.Text <> "" Then
         If ActivePresentation.Slides(2).Shapes("FinalSpinButton").Line.Transparency = 1 Then
             effectiveWheelValue = CLng(spunWheelValue.Text)
@@ -2270,9 +2303,12 @@ Private Sub setValuePanelDisplay()
         ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ""
         Exit Sub
     End If
-    If letterCounter.Text <> "" And IsNumeric(letterCounter.Text) Then
+    If letterCounter.Text <> "" And IsNumeric(letterCounter.Text) And scoreAugment.Text = "" Then
         ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text _
         & " * " & letterCounter.Text & " = $" & FormatNumber(CLng(effectiveWheelValue) * CLng(letterCounter.Text), 0)
+    ElseIf letterCounter.Text <> "" And IsNumeric(letterCounter.Text) And IsNumeric(scoreAugment.Text) Then
+        ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text = ActivePresentation.Slides(2).Shapes("ValuePanel").TextFrame.TextRange.Text _
+        & " * " & letterCounter.Text & " + " & FormatNumber(CLng(scoreAugment.Text), 0) & " = $" & FormatNumber(CLng(effectiveWheelValue) * CLng(letterCounter.Text) + CLng(scoreAugment.Text), 0)
     End If
 End Sub
 
@@ -2594,12 +2630,12 @@ Sub ExplainWildCard()
 End Sub
 
 Sub Explain5000Sliver()
-    MsgBox "Choose whether to use the $5,000 Sliver on the wheel (does not exist in the actual show). The default is off." & vbNewLine & vbNewLine & _
-    "The wedge is split into thirds: two Bankrupts on the side and $5,000 in the middle (similar to the actual show's Million Dollar Wedge).", 0, "$5,000 Sliver Setting"
+    MsgBox "Choose whether to use the $" & CStr(FormatNumber(5000, 0)) & " Sliver on the wheel (does not exist in the actual show). The default is off." & vbNewLine & vbNewLine & _
+    "The wedge is split into thirds: two Bankrupts on the side and $" & CStr(FormatNumber(5000, 0)) & " in the middle (similar to the actual show's Million Dollar Wedge).", 0, "$" & CStr(FormatNumber(5000, 0)) & " Sliver Setting"
 End Sub
 
 Sub ExplainGiftTag()
-    MsgBox "Choose whether to use the Gift Tag item on the wheel. The default is off." & vbNewLine & vbNewLine & _
+    MsgBox "Choose whether to use the Gift Tag item on the wheel (retired in 2023 on the actual show). The default is off." & vbNewLine & vbNewLine & _
     "The Gift Tag is an auxiliary item that gives the player a prize of your choice.", 0, "Gift Tag Setting"
 End Sub
 
@@ -2616,9 +2652,18 @@ Sub ExplainGamesByTimAttribution()
     MsgBox "Choose whether to display gamesbytim.com on the puzzle board.", 0, "Games by Tim Attribution Setting"
 End Sub
 
-Sub ExplainTripleTossUpScoreBonus()
-    MsgBox "As of 2021 in the actual show, solving all three Triple Toss-Ups augments that player's Triple Toss-Up winnings to 5x the Triple Toss-Up value (ex: $10,000 if each Toss-Up is worth $2,000)." & _
-    " Enable this setting to opt in the rule change. The default is off.", 0, "Triple Toss-Up Score Bonus Setting"
+Sub ExplainSpecialScoreBonuses()
+    MsgBox "Choose whether to activate the following score bonuses from the actual show:" & vbNewLine & vbNewLine & _
+    "- Calling the same letter in a Same Letter puzzle awards the player an additional $" & CStr(FormatNumber(1000, 0)) & "." & vbNewLine & _
+    "- Solving all three Triple Toss-Ups augments that player's Triple Toss-Up winnings to 5x the Triple Toss-Up value (ex: $" & CStr(FormatNumber(10000, 0)) & " if each Toss-Up is worth $" & CStr(FormatNumber(2000, 0)) & ")." & vbNewLine & vbNewLine & _
+    "To reduce confusion for new hosts, the default is off.", 0, "Special Score Bonuses Setting"
+End Sub
+
+Sub ExplainSolveButton()
+    MsgBox "Choose what happens when you press the Solve button:" & vbNewLine & vbNewLine & _
+    "- reveal - Reveal the puzzle." & vbNewLine & _
+    "- verify - An input box appears to verify the player's solution. Useful for games when the host does not know the puzzles." & vbNewLine & vbNewLine & _
+    "The default is reveal.", 0, "Solve Button Setting"
 End Sub
 
 Sub doFinalSpin()
@@ -2674,7 +2719,12 @@ Sub revealTossUpLetter()
         End If
     Next i
     If IsEmpty(blankTiles) Then
-        MsgBox "There are no more letters to reveal in this puzzle.", 0, "Reveal a Letter Error"
+        solvePuzzle (False)
+        ActivePresentation.Slides(11).Shapes("GuessLetterWrong").ActionSettings(ppMouseClick).SoundEffect.Play
+        Exit Sub
+    ElseIf UBound(blankTiles) = 0 Then
+        solvePuzzle (False)
+        ActivePresentation.Slides(11).Shapes("GuessLetterWrong").ActionSettings(ppMouseClick).SoundEffect.Play
         Exit Sub
     Else:
         Randomize
@@ -2694,7 +2744,7 @@ Sub PuzzleBoardTrimChange()
     Dim themeNumber
     Set themeNumber = ActivePresentation.Slides(9).Shapes("PuzzleBoardTrim").TextFrame.TextRange
     Dim wheelTrimGradientInner As Long, wheelTrimGradientOuter As Long, CategoryBox As Long, scoreboardOutline As Long, _
-    CategoryTrapezoid As Long, PanelOuter As Long, PanelInner As Long, lastLetterGuessed As Long, shotClockColor As Long
+    CategoryTrapezoid As Long, PanelOuter As Long, PanelInner As Long, shotClockColor As Long
     Dim boardFrameInnerGradientTop As Long, boardFrameInnerGradientBottom As Long
     If themeNumber.Text = "blue" Then
         wheelTrimGradientInner = RGB(224, 211, 164)
@@ -2706,7 +2756,6 @@ Sub PuzzleBoardTrimChange()
         scoreboardOutline = RGB(153, 124, 65)
         PanelOuter = RGB(154, 150, 60)
         PanelInner = RGB(174, 165, 52)
-        lastLetterGuessed = RGB(150, 134, 64)
         shotClockColor = RGB(151, 138, 67)
         ActivePresentation.Slides(2).Shapes("CategoryOutlineGold").Visible = True
         ActivePresentation.Slides(2).Shapes("BoardFrameOuterGold").Visible = True
@@ -2722,7 +2771,6 @@ Sub PuzzleBoardTrimChange()
         scoreboardOutline = RGB(97, 96, 112)
         PanelOuter = RGB(135, 134, 150)
         PanelInner = RGB(153, 151, 167)
-        lastLetterGuessed = RGB(97, 96, 112)
         shotClockColor = RGB(135, 134, 150)
         ActivePresentation.Slides(2).Shapes("CategoryOutlineGold").Visible = False
         ActivePresentation.Slides(2).Shapes("BoardFrameOuterGold").Visible = False
@@ -2740,7 +2788,6 @@ Sub PuzzleBoardTrimChange()
         scoreboardOutline = RGB(57, 57, 231)
         PanelOuter = RGB(86, 111, 182)
         PanelInner = RGB(21, 124, 187)
-        lastLetterGuessed = RGB(105, 99, 177)
         shotClockColor = RGB(79, 129, 189)
         ActivePresentation.Slides(2).Shapes("CategoryOutlineSilver").Visible = False
         ActivePresentation.Slides(2).Shapes("BoardFrameOuterSilver").Visible = False
@@ -2764,9 +2811,6 @@ Sub PuzzleBoardTrimChange()
         End With
         With .Shapes("ScoreBoard")
             .Line.ForeColor.RGB = scoreboardOutline
-        End With
-        With .Shapes("LastLetterGuessed")
-            .Line.ForeColor.RGB = lastLetterGuessed
         End With
         With .Shapes("ValuePanel")
             .Fill.GradientStops.Insert PanelOuter, 0
@@ -2820,10 +2864,26 @@ Sub toggleGamesByTimAttribution(oClickedShape As Shape)
         ActivePresentation.Slides(2).Shapes("GamesByTimButton").Visible = False
         ActivePresentation.Slides(2).Shapes("TopRightBG").Left = 536.4376
         ActivePresentation.Slides(2).Shapes("TopRightBG").Width = 171.0907
+        ActivePresentation.Slides(2).Shapes("BonusLetters").Left = 368.158
+        ActivePresentation.Slides(2).Shapes("ResetBonus").Left = 446.6068
+        ActivePresentation.Slides(2).Shapes("HelpBonus").Left = 448.1335
+        ActivePresentation.Slides(2).Shapes("RSTLNE").Left = 270.143
+        ActivePresentation.Slides(2).Shapes("BonusOutline").Left = 396
+        ActivePresentation.Slides(2).Shapes("RSTLNEOutline").Left = 295.2
+        ActivePresentation.Slides(2).Shapes("BonusBox").Left = 396
+        ActivePresentation.Slides(2).Shapes("RSTLNEBox").Left = 295.2
     Else:
         ActivePresentation.Slides(2).Shapes("GamesByTimButton").Visible = True
         ActivePresentation.Slides(2).Shapes("TopRightBG").Left = 457.9191
         ActivePresentation.Slides(2).Shapes("TopRightBG").Width = 249.609
+        ActivePresentation.Slides(2).Shapes("BonusLetters").Left = 350.0474
+        ActivePresentation.Slides(2).Shapes("ResetBonus").Left = 428.4962
+        ActivePresentation.Slides(2).Shapes("HelpBonus").Left = 430.0229
+        ActivePresentation.Slides(2).Shapes("RSTLNE").Left = 252.0324
+        ActivePresentation.Slides(2).Shapes("BonusOutline").Left = 377.8894
+        ActivePresentation.Slides(2).Shapes("RSTLNEOutline").Left = 277.0894
+        ActivePresentation.Slides(2).Shapes("BonusBox").Left = 377.8894
+        ActivePresentation.Slides(2).Shapes("RSTLNEBox").Left = 277.0894
     End If
 End Sub
 
@@ -2879,6 +2939,9 @@ Sub changeRounds(oClickedShape As Shape)
         ActivePresentation.Slides(2).Shapes("Wheel to Normal Round").Visible = True
         ActivePresentation.Slides(2).Shapes("Normal Round").Visible = True
         toggleBonusRound (False)
+        If ActivePresentation.Slides(2).Shapes("BonusOutline").Line.Transparency = 0 Then
+           resetBonusRound
+        End If
     End If
 End Sub
 
@@ -2894,4 +2957,79 @@ Sub randomCategory()
     wait (0.1)
     ActivePresentation.Slides(8).Shapes("SetUpPuzzleCategory").TextFrame.TextRange.Text = categories(randomNumber)
 End Sub
+
+Sub toggleSolveButton()
+    If ActivePresentation.Slides(9).Shapes("SolveButton").TextFrame.TextRange.Text = "reveal" Then
+        ActivePresentation.Slides(9).Shapes("SolveButton").TextFrame.TextRange.Text = "verify"
+    Else:
+        ActivePresentation.Slides(9).Shapes("SolveButton").TextFrame.TextRange.Text = "reveal"
+    End If
+End Sub
+
+Private Function verifyPuzzle(resetValuePanel As Boolean) As Boolean
+' Portions of this function written by JapanYoshi: https://github.com/TimTree/wheel-of-fortune-ppt/pull/7
+    On Error GoTo errHandler
+    Dim sText As String
+    ' Produce the puzzle as currently on the board as the default input in the Verify Solve input box, as well as the correct answer
+    Dim current As String, answer As String, char As String, i As Integer
+    current = ""
+    answer = ""
+    For i = 1 To 52
+        char = ActivePresentation.Slides(2).Shapes("PuzzleCache" & i).TextFrame.TextRange.Text
+        ' Add space if tile is blank and answer doesn't already end with space.
+        If char = "" Then
+            If Right$(answer, 1) <> " " Then
+                answer = answer + " "
+                current = current + " "
+            End If
+        ' Add character in tile if not blank.
+        ' For current puzzle, add underscore if the character has not yet been revealed.
+        Else
+            answer = answer + char
+            If ActivePresentation.Slides(2).Shapes("PuzzleBoard" & i).TextFrame.TextRange.Text = "" Then
+                current = current + "_"
+            Else:
+                current = current + char
+            End If
+        End If
+        ' Add space if last tile in row is character.
+        If Right$(answer, 1) = " " And (i = 12 Or i = 26 Or i = 40 Or i = 52) Then
+            answer = RTrim(answer) + " "
+            current = RTrim(current) + " "
+        End If
+    Next i
+    answer = Trim(answer)
+    current = Trim(current)
+    ' If the answer is blank or the current puzzle is the answer, automatically run the solvePuzzle function
+    If answer = "" Or answer = current Then
+        solvePuzzle (resetValuePanel)
+        verifyPuzzle = True
+        Exit Function
+    End If
+    ' Ask the user for input.
+    sText = InputBox( _
+        "Type the player's answer to check it. Double-check for typos!" & vbNewLine & vbNewLine & _
+        "To reveal without typing the answer, type ""/reveal"" (without quotes).", _
+        "Verify Solve", LCase(current))
+    ' Cancel solve if user clicks Cancel or enters a blank answser
+    If sText = "" Then
+        verifyPuzzle = False
+        Exit Function
+    ElseIf "/reveal" <> sText And 0 <> StrComp(answer, Trim(sText), 1) Then
+        ' wrong answer. exit out
+        MsgBox "Incorrect solve, sorry!", 0, "Incorrect Solve"
+        verifyPuzzle = False
+        ActivePresentation.Slides(11).Shapes("GuessLetterWrong").ActionSettings(ppMouseClick).SoundEffect.Play
+        Exit Function
+    Else:
+        ' correct answer or /reveal
+        solvePuzzle (resetValuePanel)
+        verifyPuzzle = True
+        Exit Function
+    End If
+errHandler:
+    Exit Function
+End Function
+
+
 
